@@ -11,7 +11,7 @@ project:
   tiles: "1x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 3x4 or 4x4
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_essen"
+  top_module:  "tt_um_teapot"
 
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
