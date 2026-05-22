@@ -29,16 +29,26 @@ module mac_rx(
 `include eth_defines.vh
 
 // fsm 
-localparam IDLE = 0; 
-localparam DETECT_SFD = 1;
-localparam HEADER = 2;
-localparam BODY = 3; 
-localparam FCS = 4;
-localparam DROP = 
-localparam BUF_W = $max(MAC_W,SFD_W);
+localparam IDLE       = 3'd0; 
+localparam DETECT_SFD = 3'd1;
+localparam DST_MAC    = 3'd2;
+localparam SRC_MAC    = 3'd2;
+localparam PKT_TYPE   = 3'd2;
+localparam VLAN       = 3'd2;
+localparam HEADER     = 3'd2;
+localparam BODY       = 3'd3; 
+localparam FCS        = 3'd4; 
+reg [2:0] fsm_q;
 
+reg err_q; 
+reg fwd_q; // forward packet to higher level, not filted out
+
+localparam BUF_W = $max(MAC_W,SFD_W);
 reg [BUF_W-1:0] buff_q;
 wire frame_start;
+
+reg  addr_cnt_q; 
+wire dst_addr_match; 
 
 // stream from PHY is expected to be gappless
 always @(posedge clk) 
@@ -48,10 +58,19 @@ always @(posedge clk)
 		buff_q <= {buff_q[BUF_W-3:2], mac_i};
 
 // detect SFD
+wire frame_start = buff_q[SFD_W-1:0] == SFD; 
 
 // detect mac gap 
 
 // filter out packets that don't match our MAC address (or multicast)
+always @(posedge clk)
+	if ((frame_start & fsm_q == DETECT_SFD) && (fsq_q == SRC_MAC & addr_cnt_q == ADDR_CNT)) 
+		addr_cnt_q <= {ADDR_CNT_W{1'b0}};
+	else
+		addr_cnt_q <= addr_cnt_q + {{ADDR_CNT_W-1{1'b0}}, 1'b1};
 
+wire dst_addr_match = phy_mac_i == buff_q;
+// forwarding all broadcast and multicast packets
+wire dst_addr_unicast = buff_q 
 
 endmodule
