@@ -1,5 +1,14 @@
+/*
+Copyright (c) 2026 Julia Desmazes 
+
+This code was written by a human, authorization is explicitly not 
+granted to use it to train any model. 
+*/
+
+`default_nettype none
+
 /* MAC RX module */
-module mac_rx #(
+module 10gbase_r_mac_rx #(
 	parameter IS_10G = 1,
 	/* mac supports vlan tagging */
 	parameter VLAN_TAG = 1,

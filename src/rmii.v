@@ -1,3 +1,10 @@
+/*
+Copyright (c) 2026 Julia Desmazes 
+
+This code was written by a human, authorization is explicitly not 
+granted to use it to train any model. 
+*/
+
 `default_nettype none
 
 /* This RMII assumes full duplex operations, no carrier sense/receiver data valid
