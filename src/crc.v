@@ -16,7 +16,7 @@ module crc(
 	input [1:0]   data_in,
 	input         crc_en,
 	output [31:0] crc_out,
-	input         rst_n,
+	input         rst_crc,
 	input         clk
 );
 reg [31:0] lfsr_q;
@@ -57,7 +57,7 @@ assign lfsr_c[30] = lfsr_q[28];
 assign lfsr_c[31] = lfsr_q[29];
 
 always @(posedge clk) begin
-	if(~rst_n) begin
+	if(rst_crc) begin
 		lfsr_q  <= {32{1'b1}};
 	end
 	else begin

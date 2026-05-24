@@ -26,7 +26,33 @@ module mac_rx(
 	output [1:0] mcu_cmd_o,
 	output [1:0] mcu_o
 ); 
-`include "src/eth_defines.vh"
+// physical interface
+localparam PHY_W = 2; 
+
+localparam MAC_W        = 48;
+localparam ADDR_CNT_VAL = (MAC_W / (8/PHY_W)) - 1;
+localparam ADDR_CNT_W   = $clog2(ADDR_CNT_VAL); 
+/* verilator lint_off WIDTHTRUNC */
+localparam [ADDR_CNT_W-1:0] ADDR_CNT = ADDR_CNT_VAL;
+/* verilator lint_on WIDTHTRUNC */
+
+localparam SFD_W = 8; 
+localparam [SFD_W-1:0] SFD = 8'b10101011; 
+
+localparam FRAME_TYPE_W       = 16;
+localparam FRAME_TYPE_CNT_VAL = (FRAME_TYPE_W / (8/PHY_W)) - 1;
+localparam FRAME_TYPE_CNT_W   = $clog2(FRAME_TYPE_CNT_VAL);
+/* verilator lint_off WIDTHTRUNC */
+localparam [FRAME_TYPE_CNT_W-1:0] FRAME_TYPE_CNT = FRAME_TYPE_CNT_VAL;
+/* verilator lint_on WIDTHTRUNC */
+
+localparam [FRAME_TYPE_W-1:0] TYPE_VLAN = 16'h8100;
+localparam VID_W = 12;
+
+// FCS 
+localparam FCS_W = 32; 
+
+localparam DELAY_DEPTH = FCS_W / (8/PHY_W);
 
 localparam RX_CMD_IDLE  = 2'b00;
 localparam RX_CMD_EARLY = 2'b01;
@@ -143,9 +169,9 @@ always @(posedge clk)
 // FCS 
 crc m_fcs(
 	.clk(clk),
-	.rst_n(rst_n),
+	.rst_crc(fsm_q == IDLE),
 	.data_in(rx_i),
-	.crc_en(1'b1), // TODO
+	.crc_en(fsm_q != DETECT_SFD),
 	.crc_out(pkt_fcs)
 );
 assign fcs_err = ~|pkt_fcs;// TODO
