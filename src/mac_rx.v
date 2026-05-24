@@ -69,11 +69,6 @@ wire vid_match;
 wire [FCS_W-1:0] pkt_fcs;
 wire             fcs_err; 
 
-reg       mcu_v_q; 
-reg [1:0] mcu_q;
-reg       mcu_start_q; 
-reg       mcu_err_q; 
-
 // fsm 
 always @(posedge clk) begin
 	if (~rst_n) 
@@ -92,7 +87,8 @@ always @(posedge clk) begin
 				PKT_TYPE:   fsm_q <= cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT ? (type_vlan? VLAN: BODY):PKT_TYPE;
 				VLAN:       fsm_q <= cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT ? BODY: VLAN; 
 				BODY:       fsm_q <= rx_v_i ? BODY: FCS; 
-				FCS:        fsm_q <= IDLE;  
+				FCS:        fsm_q <= IDLE; 
+				default:    fsm_q <= IDLE; 
 			endcase	
 		end
 	end
@@ -156,8 +152,8 @@ assign fcs_err = ~|pkt_fcs;// TODO
 
 // data buffer, excluding the FCS without keeping track of
 // the data width for portability
-wire [DELAY_DEPTH-1:0] delay_mcu_v_q; 
-wire [DELAY_DEPTH-1:0] delay_mcu_start_q; 
+reg [DELAY_DEPTH-1:0] delay_mcu_v_q; 
+reg [DELAY_DEPTH-1:0] delay_mcu_start_q; 
 
 always @(posedge clk)
 	if (~rst_n)

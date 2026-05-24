@@ -57,17 +57,23 @@ always @(posedge clk)
 	else if ( |rst_cnt_q )
 		rst_cnt_q <= rst_cnt_q - {{RST_CNT_W-1{1'b0}}, 1'b1};
 
+reg phy_rst_n_q;
 always @(posedge clk) 
 	if (~rst_n)
-		phy_rst_n_o <= 1'b0;
+		phy_rst_n_q <= 1'b0;
 	else if ( rst_cnt_q == RST_RELEASE_CNT ) 
-		phy_rst_n_o <= 1'b0;
+		phy_rst_n_q <= 1'b0;
+assign phy_rst_n_o = phy_rst_n_q;
 
+reg       phy_rx_v_dir_q;
+reg [1:0] phy_rx_dir_q;
 always @(posedge clk) 
 	if (~rst_n) 
-		{phy_rx_v_dir_o, phy_rx_dir_o} <= {3{1'b1}};
+		{phy_rx_v_dir_q, phy_rx_dir_q} <= {3{1'b1}};
 	else if ( &(~rst_cnt_q) )
-		{phy_rx_v_dir_o, phy_rx_dir_o} <= {3{1'b0}};
+		{phy_rx_v_dir_q, phy_rx_dir_q} <= {3{1'b0}};
+assign phy_rx_v_dir_o = phy_rx_v_dir_q;
+assign phy_rx_dir_o   = phy_rx_dir_q;
 
 // MODE
 assign {phy_rx_v_o, phy_rx_o} = CONF_MODE;
