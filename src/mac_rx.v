@@ -54,11 +54,6 @@ localparam FCS_W = 32;
 
 localparam DELAY_DEPTH = FCS_W / (8/PHY_W);
 
-localparam RX_CMD_IDLE  = 2'b00;
-localparam RX_CMD_EARLY = 2'b01;
-localparam RX_CMD_DATA  = 2'b10;
-localparam RX_CMD_ERR   = 2'b11;
-
 // fsm 
 localparam ERR        = 4'd0; 
 localparam IDLE       = 4'd1; 
@@ -164,7 +159,7 @@ always @(posedge clk)
 	if (fsm_q == IDLE) 
 		err_q <= 1'b0; // IFG guaranties no back to back frames
 	else 
-		err_q <=  err_q | (rx_v_i & rx_err_i); 
+		err_q <=  err_q | (rx_v_i & rx_err_i) | fcs_err; 
 
 // FCS 
 crc m_fcs(
@@ -174,7 +169,7 @@ crc m_fcs(
 	.crc_en(fsm_q != DETECT_SFD),
 	.crc_out(pkt_fcs)
 );
-assign fcs_err = ~|pkt_fcs;// TODO
+assign fcs_err = fsm_q == FCS & ~|pkt_fcs;// end of packet, check fcs
 
 // data buffer, excluding the FCS without keeping track of
 // the data width for portability

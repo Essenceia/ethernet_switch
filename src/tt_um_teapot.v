@@ -77,6 +77,10 @@ assign uo_out[3]   = 1'b0;
 assign uo_out[5:4] = mcu_rx;
 assign uo_out[7:6] = mcu_rx_cmd;
 
+// misc
+wire ena_unused; 
+assign ena_unused = ena; 
+
 // rmii 
 rmii m_rmii(
 	.clk(clk),
