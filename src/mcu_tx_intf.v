@@ -29,7 +29,7 @@ localparam TX_CMD_DATA          = 2'b01;
 localparam TX_CMD_CONF_PHASE    = 2'b10;
 localparam TX_CMD_CONF_MAC_VID  = 2'b11;
 
-reg prev_valid_q;
+reg tx_data_v_q;
 
 reg [1:0] mcu_tx_cmd_q;
 reg [1:0] mcu_tx_q;

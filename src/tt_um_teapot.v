@@ -29,6 +29,7 @@ wire [1:0] mcu_rx_cmd;
 wire [1:0] mcu_rx;
 
 wire       mac_tx_v;
+wire       mac_tx_start;
 wire [1:0] mac_tx;
 wire       mac_rx_err;
 wire       mac_rx_v;
@@ -122,7 +123,7 @@ mac_rx m_mac_rx(
 );
 
 // tx mcu intf
-mcu_tx_inft m_mcu_tx_intf(
+mcu_tx_intf m_mcu_tx_intf(
 	.clk(clk),
 	.rst_n(rst_n),
 

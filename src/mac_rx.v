@@ -67,7 +67,7 @@ wire type_vlan;
 wire vid_match;
   
 wire [FCS_W-1:0] pkt_fcs;
-wire             fcs_match; 
+wire             fcs_err; 
 
 reg       mcu_v_q; 
 reg [1:0] mcu_q;
@@ -87,10 +87,10 @@ always @(posedge clk) begin
 				ERR:        fsm_q <= IDLE; 
 				IDLE:       fsm_q <= rx_v_i ? DETECT_SFD : IDLE;
 				DETECT_SFD: fsm_q <= frame_start ? DST_MAC: DETECT_SFD;
-				DST_MAC:    fsm_q <= cnt_q == ADDR_CNT ? SRC_MAC: DST_MAC; 
-				SRC_MAC:    fsm_q <= cnt_q == ADDR_CNT ? PKT_TYPE: SRC_MAC;
-				PKT_TYPE:   fsm_q <= cnt_q == FRAME_TYPE_CNT ? (type_vlan? VLAN: BODY):PKT_TYPE;
-				VLAN:       fsm_q <= cnt_q == FRAME_TYPE_CNT ? BODY: VLAN; 
+				DST_MAC:    fsm_q <= cnt_q[ADDR_CNT_W-1:0] == ADDR_CNT ? SRC_MAC: DST_MAC; 
+				SRC_MAC:    fsm_q <= cnt_q[ADDR_CNT_W-1:0] == ADDR_CNT ? PKT_TYPE: SRC_MAC;
+				PKT_TYPE:   fsm_q <= cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT ? (type_vlan? VLAN: BODY):PKT_TYPE;
+				VLAN:       fsm_q <= cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT ? BODY: VLAN; 
 				BODY:       fsm_q <= rx_v_i ? BODY: FCS; 
 				FCS:        fsm_q <= IDLE;  
 			endcase	
@@ -98,23 +98,25 @@ always @(posedge clk) begin
 	end
 end
 // stream from PHY is expected to be gappless
-assign buff = {buff_q[BUF_W-5:2], rx_i};
+assign buff = {buff_q[BUF_W-3:0], rx_i};
 
 always @(posedge clk) 
 	if (~rst_n) 
 		buff_q <= {BUF_W-2{1'b0}};
 	else
-		buff_q <= buff;
+		buff_q <= buff[BUF_W-3:0];
  
 // detect SFD
 assign frame_start = buff[SFD_W-1:0] == SFD; 
 
 // filter out packets that don't match our MAC address (or multicast)
 always @(posedge clk)
-	if ((frame_start & fsm_q == DETECT_SFD) && (fsm_q == SRC_MAC & cnt_q == ADDR_CNT)) 
-		cnt_q <= {ADDR_CNT_W{1'b0}};
+	if ((frame_start & fsm_q == DETECT_SFD) 
+       | (((fsm_q == SRC_MAC) | (fsm_q == DST_MAC)) & cnt_q[ADDR_CNT_W-1:0] == ADDR_CNT) 
+       | (((fsm_q == PKT_TYPE) | (fsm_q == VLAN)) & cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT)) 
+		cnt_q <= {CNT_W{1'b0}};
 	else
-		cnt_q <= cnt_q + {{ADDR_CNT_W-1{1'b0}}, 1'b1};
+		cnt_q <= cnt_q + {{CNT_W-1{1'b0}}, 1'b1};
 
 assign dst_addr_match = phy_mac_i == buff;
 // forwarding all broadcast and multicast packets
@@ -125,14 +127,14 @@ assign dst_addr_group = buff[MAC_W-8];
 assign type_vlan = buff[FRAME_TYPE_W-1:0] == TYPE_VLAN; 
 assign vid_match = buff[VID_W-1:0] == vid_i;
 
-assign body_start_next = (cnt_q == FRAME_TYPE_CNT) & (((fsm_q == PKT_TYPE) & ~type_vlan) 
+assign body_start_next = (cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT) & (((fsm_q == PKT_TYPE) & ~type_vlan) 
 				       | (fsm_q == VLAN)); 
 
 // forward 
 always @(posedge clk) 
-	if ((fsm_q == DST_MAC) & (cnt_q == ADDR_CNT))
+	if ((fsm_q == DST_MAC) & (cnt_q[ADDR_CNT_W-1:0] == ADDR_CNT))
 		fwd_q <= dst_addr_group | dst_addr_match;
-	else if ((fsm_q == VLAN) & (cnt_q == FRAME_TYPE_CNT))
+	else if ((fsm_q == VLAN) & (cnt_q[FRAME_TYPE_CNT_W-1:0] == FRAME_TYPE_CNT))
 		fwd_q <= fwd_q & vid_match;
 
 // sticky error 
@@ -140,17 +142,17 @@ always @(posedge clk)
 	if (fsm_q == IDLE) 
 		err_q <= 1'b0; // IFG guaranties no back to back frames
 	else 
-		err_q <=  err_q | (rx_v_i & rx_err_i) | pkt_fcs; 
+		err_q <=  err_q | (rx_v_i & rx_err_i); 
 
 // FCS 
 crc m_fcs(
 	.clk(clk),
 	.rst_n(rst_n),
 	.data_in(rx_i),
-	.crc_en(1'b1),
+	.crc_en(1'b1), // TODO
 	.crc_out(pkt_fcs)
 );
-assign fcs_match = ~|pkt_fcs;
+assign fcs_err = ~|pkt_fcs;// TODO
 
 // data buffer, excluding the FCS without keeping track of
 // the data width for portability
@@ -173,9 +175,8 @@ end
 // 01 - early
 // 10 - valid
 // 11 - error
-
 assign mcu_cmd_o[0]  = err_q | delay_mcu_start_q[DELAY_DEPTH-2]; 
-assign mcu_cmd_o[1]    = delay_mcu_v_q[DELAY_DEPTH-1];
+assign mcu_cmd_o[1]  = delay_mcu_v_q[DELAY_DEPTH-1];
 assign mcu_o         = buff_q[FCS_W+1:FCS_W];
 
 endmodule

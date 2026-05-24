@@ -60,7 +60,7 @@ always @(posedge clk)
 always @(posedge clk) 
 	if (~rst_n) 
 		{ mac_addr_q, vid_q} <= { MAC_ADDR, VID};
-	else if (conf_v_i & conf_type == CONF_TYPE_MAC_VID)
+	else if (conf_v_i & conf_type_i == CONF_TYPE_MAC_VID)
 		{ mac_addr_q, vid_q} <= {mac_addr_q[MAC_ADDR_W-3:0], vid_q, conf_i};
 		
 assign clk_phase_sel_o = phase_sel_q;
