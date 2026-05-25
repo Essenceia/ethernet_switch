@@ -40,10 +40,11 @@ class eth_frame:
 	
 	def random_body(self):
 		l = random.randint(48,2000)
-		self.body = bytes(0)
+		body = bytearray(0)
 		for i in range(0,l):
-			self.body.append(random.randint(0,255))
-		self.header = self.header._replace(ethtype = struct.pack('!p', l))
+			body.append(random.randint(0,255))
+		self.body = body
+		self.header = self.header._replace(ethtype = struct.pack('!H', l))
  
 	def __init__(self, dst, src, vlan_tag = None):
 		if self.header.vlan_tag is not None: 
@@ -63,7 +64,8 @@ class eth_frame:
 		return r
 
 async def phy_stream_frame(dut, raw):
-	preamble = random.randinit(1,10)
+	cocotb.log.info(f"raw frame {raw}")
+	preamble = random.randint(1,10)
 	dut.phy_rx_err.value = 0
 	for _ in range(1, preamble):
 		dut.phy_rx_v.value = 1
@@ -83,4 +85,5 @@ async def phy_stream_frame(dut, raw):
 	
 async def send_simple_frame(dut):
 	frame = eth_frame(b"\xAA\xBB\xCC\xDD\xEE\xFF",b"\x00\x11\x22\x33\x44\x55")
-	phy_stream_frame(dut,frame.raw())
+	frame.random_body()
+	await phy_stream_frame(dut,frame.raw())
