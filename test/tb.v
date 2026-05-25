@@ -17,12 +17,12 @@ module tb ();
 	end
 
 	// Wire up the inputs and outputs:
-	reg clk;
-	reg rst_n;
-	reg ena;
+	wire clk;
+	wire rst_n;
+	wire ena;
 	
-	reg [7:0]  ui_in;
-	reg [7:0]  uio_in;
+	wire [7:0]  ui_in;
+	wire [7:0]  uio_in;
 	wire [7:0] uo_out;
 	wire [7:0] uio_out;
 	wire [7:0] uio_oe;
@@ -39,7 +39,9 @@ module tb ();
 	wire [1:0] mcu_rx;
 	wire [1:0] mcu_rx_cmd;
 
-	assign uio_in[3:0] = {phy_rx_err, phy_rx_v, phy_rx};
+	assign uio_in[1:0] = phy_rx;
+	assign uio_in[2]   = phy_rx_v;
+	assign uio_in[3]   = phy_rx_err;
 	assign mcu_rx      = uo_out[5:4];
 	assign mcu_rx_cmd  = uo_out[7:6];
 
