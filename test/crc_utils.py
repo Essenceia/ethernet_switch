@@ -1,19 +1,3 @@
-# static inline u32 ns_crc_32(                           
-#     const void *_dat,                                  
-#     uad siz,                                           
-#     U32 *tbl,                                          
-#     U32 val_stt,                                       
-#     U32 xor_end                                        
-# )                                                      
-# {                                                      
-#     U8 *dat = (U8 *) _dat;                             
-#     u32 crc = val_stt;                                 
-#     for (uad dat_idx = 0; dat_idx < siz; dat_idx++) {  
-#         U8 tbl_idx = (crc ^ dat[dat_idx]) & 0xff;      
-#         crc = (crc >> 8) ^ tbl[tbl_idx];               
-#     }                                                  
-#     return crc ^ xor_end;                              
-# }       
 import struct 
  
 CRC32_TABLE = [
@@ -50,10 +34,11 @@ CRC32_TABLE = [
 0x89B8FD09, 0x8D79E0BE,  0x803AC667, 0x84FBDBD0,   0x9ABC8BD5, 0x9E7D9662,  0x933EB0BB, 0x97FFAD0C,
 0xAFB010B1, 0xAB710D06,  0xA6322BDF, 0xA2F33668,   0xBCB4666D, 0xB8757BDA,  0xB5365D03, 0xB1F740B4 
 ]
-            
-def calc_fcs(data):
-	crc = 0xFFFFFFFF
-	for byte in data:
-		idx = (crc ^ byte) & 0xFF
-		crc = (crc >> 8) ^ CRC32_TABLE[idx]
-	return struct.pack('!I',crc) 
+def calc_fcs(data):                                        
+    crc = 0xFFFFFFFF                                                                                                                                                                
+    for byt in data:                                       
+        idx = ((crc >> 24) ^ byt) & 0xff;                  
+        elm = CRC32_TABLE[idx]                             
+        crc = ((crc << 8) ^ elm) & 0xffffffff              
+    return struct.pack('!I',crc)      
+             
