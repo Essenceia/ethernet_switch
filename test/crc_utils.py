@@ -15,7 +15,6 @@
 #     return crc ^ xor_end;                              
 # }       
 import struct 
-import cocotb 
  
 CRC32_TABLE = [
 0x00000000, 0x04C11DB7,  0x09823B6E, 0x0D4326D9,   0x130476DC, 0x17C56B6B,  0x1A864DB2, 0x1E475005,
@@ -53,10 +52,8 @@ CRC32_TABLE = [
 ]
             
 def calc_fcs(data):
-	cocotb.log.info(f"raw data {data.hex()}")
 	crc = 0xFFFFFFFF
 	for byte in data:
 		idx = (crc ^ byte) & 0xFF
 		crc = (crc >> 8) ^ CRC32_TABLE[idx]
-	cocotb.log.info(f"crc {hex(crc)}")
 	return struct.pack('!I',crc) 
