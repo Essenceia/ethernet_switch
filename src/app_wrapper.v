@@ -13,7 +13,8 @@ Since data without the proper dst address and ethertype
 if filtered out we are not adding a magic number check.
 */
 module app_wrapper #(
-	localparam PHY_W = 2
+	parameter PHY_W = 2,
+	localparam MAC_W = 48 
 )(
 	input clk, 
 	input wire rst_n, 
@@ -23,12 +24,12 @@ module app_wrapper #(
 	input wire             data_start_i,
 	input wire             data_err_i,
 	input wire [PHY_W-1:0] data_i,
-	input wire [47:0]      data_src_mac_i, 
+	input wire [MAC_W-1:0]      data_src_mac_i, 
 
 	output wire            mac_tx_v_o,// request and valid
 	input wire             mac_tx_acc_i, // accept
-	output wire [1:0]      mac_tx_o,
-	output wire [47:0]     mac_tx_dst_mac_o// guarantied to not change until packet header has finished sending
+	output wire [PHY_W-1:0]      mac_tx_o,
+	output wire [MAC_W-1:0]     mac_tx_dst_mac_o// guarantied to not change until packet header has finished sending
 );
 localparam PKT_DATA_W       = 32;
 localparam PKT_DATA_CNT_VAL = (PKT_DATA_W/PHY_W) - 1;
@@ -42,7 +43,7 @@ localparam [PKT_DATA_CNT_W-1:0] PKT_DATA_CNT = PKT_DATA_CNT_VAL;
 0                           15                       31               383
 */
 reg [PKT_DATA_W-1:0]   payload_q;
-reg [PKT_DATA_CNT-1:0] rx_cnt_q; 
+reg [PKT_DATA_CNT_W-1:0] rx_cnt_q; 
 
 /* RX 
 rx fsm */
@@ -77,16 +78,16 @@ bf16_mul_fast m_bf16_mul(
 	.clk(clk),
 
 	.sa_i(payload_q[31]),
-	.ea_i(payload_q[30:24]),
-	.ma_i(payload_q[23:16]),
+	.ea_i(payload_q[30:23]),
+	.ma_i(payload_q[22:16]),
 
 	.sb_i(payload_q[15]),
-	.eb_i(payload_q[14:8]),
-	.mb_i(payload_q[7:0]),
+	.eb_i(payload_q[14:7]),
+	.mb_i(payload_q[6:0]),
 
 	.s_o(mul_res[15]),
-	.e_o(mul_res[14:8]),
-	.m_o(mul_res[7:0])
+	.e_o(mul_res[14:7]),
+	.m_o(mul_res[6:0])
 );
 
 /* TX 

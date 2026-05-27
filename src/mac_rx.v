@@ -13,15 +13,18 @@ this device and will forward starting from the payload and excluding
 the FCS. 
 */ 
 module mac_rx #(
-	// 802a playpen ethertypes 
+	parameter PHY_W = 2,
+	localparam MAC_W = 48,
+	localparam VID_W = 12,
+	 // 802a playpen ethertypes 
 	parameter [15:0] APP_ETHTYPE  = 16'h88B5,
 	parameter [15:0] CONF_ETHTYPE = 16'h88B6
 )(
 	input clk, 
 	input wire rst_n, 
 
-	input wire [47:0] phy_mac_i, 
-	input wire [11:0] vid_i,// vlan id
+	input wire [MAC_W-1:0] phy_mac_i, 
+	input wire [VID_W-1:0] vid_i,// vlan id
  
 	input wire        rx_v_i, 
 	input wire [1:0]  rx_i, 
@@ -29,16 +32,12 @@ module mac_rx #(
 
 	// to accelerator wrapper
 	output wire        data_v_o,
-	output wire [15:0] data_conf_o,
+	output wire        data_conf_o,
 	output wire        data_start_o,
 	output wire        data_err_o,
 	output wire [1:0]  data_o,
-	output wire [47:0] data_src_mac_o 
+	output wire [MAC_W-1:0] data_src_mac_o 
 ); 
-// physical interface
-localparam PHY_W = 2; 
-
-localparam MAC_W        = 48;
 localparam ADDR_CNT_VAL = (MAC_W/PHY_W) - 1;
 localparam ADDR_CNT_W   = $clog2(ADDR_CNT_VAL); 
 /* verilator lint_off WIDTHTRUNC */
@@ -56,7 +55,6 @@ localparam [FRAME_TYPE_CNT_W-1:0] FRAME_TYPE_CNT = FRAME_TYPE_CNT_VAL;
 /* verilator lint_on WIDTHTRUNC */
 
 localparam [FRAME_TYPE_W-1:0] TYPE_VLAN = 16'h8100;
-localparam VID_W = 12;
 
 // FCS 
 localparam FCS_W = 32; 
@@ -94,10 +92,8 @@ reg  [CNT_W-1:0] cnt_q; // shared counter
 
 reg [MAC_W-1:0] src_mac_q;
 wire            dst_addr_match; 
-wire            dst_addr_broadcat; 
 
 wire            is_type;
-reg             body_start_q;
 wire            type_vlan; 
 wire            vid_match;
   

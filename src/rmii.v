@@ -39,8 +39,6 @@ localparam       RST_CNT_W = 4;
 localparam [RST_CNT_W-1:0] RST_CYCLES = {RST_CNT_W{1'b1}};
 localparam [RST_CNT_W-1:0] RST_RELEASE_CNT = {{RST_CNT_W-1{1'b0}}, 1'b1};
 
-localparam [2:0] RST_MODE = 3'b011; // full-duplex 100BASE-TX 
-
 localparam [2:0] CONF_MODE = 3'b011; // 100BASE-T full-duplex
 
 /* 

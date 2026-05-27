@@ -18,9 +18,9 @@ on the module parameters and reset to default
 on each sync reset.
 */
 module mac_conf #(
-	localparam PHY_W = 2,
 	localparam VID_W = 12,
 	localparam MAC_W = 48,
+	parameter PHY_W = 2,
 	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
 	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel beef 
 )
@@ -28,13 +28,13 @@ module mac_conf #(
 	input clk, 
 	input rst_n,
 
-	input wire           default_tx_phase_i, 
+	input wire             default_tx_phase_i, 
 	
-	input wire           data_v_i,
-	input wire           data_conf_i,
-	input wire           data_start_i,
-	input wire           data_err_i,
-	input wire [PHY_W:0] data_i,
+	input wire             data_v_i,
+	input wire             data_conf_i,
+	input wire             data_start_i,
+	input wire             data_err_i,
+	input wire [PHY_W-1:0] data_i,
 
 	output wire             clk_phase_sel_o,
 	output wire [VID_W-1:0] vid_o,
@@ -74,7 +74,7 @@ always @(posedge clk) begin
 	else begin
 		case(fsm_q)
 			IDLE: fsm_q <= data_start_i & ~data_err_i & data_conf_i ? CONF: IDLE; 
-			CONF: fsm_q <=  cnt_q == PKT_DATA_CNT_VAL? IDLE: CONF;
+			CONF: fsm_q <=  cnt_q == PKT_DATA_CNT? IDLE: CONF;
 		endcase
 	end
 end

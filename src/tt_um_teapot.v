@@ -13,7 +13,6 @@ module tt_um_teapot #(
 	localparam MAC_W = 48,
  	parameter [15:0]      APP_ETHTYPE  = 16'h88B5,
 	parameter [15:0]      CONF_ETHTYPE = 16'h88B6, 
-	parameter             DEFAULT_TX_CLK_PHASE = 1'b1, 
 	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
 	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel manifacturer
 )(
@@ -27,29 +26,29 @@ module tt_um_teapot #(
     input  wire       rst_n     // reset_n - low to reset
 );
 
-wire [11:0] vid; 
-wire [47:0] mac_addr;
+wire [VID_W-1:0] vid; 
+wire [MAC_W-1:0] mac_addr;
 wire        clk_phase_sel;
 
 wire        data_rx_v;
 wire        data_rx_conf;
 wire        data_rx_start;
 wire        data_rx_err;
-wire [1:0]  data_rx;
-wire [47:0] data_rx_src_mac; 
+wire [PHY_W-1:0]  data_rx;
+wire [MAC_W-1:0] data_rx_src_mac; 
 
 wire        mac_tx_v;
 wire        mac_tx_acc;
-wire [1:0]  mac_tx;
-wire [47:0] mac_tx_dst_mac;
+wire [PHY_W-1:0]  mac_tx;
+wire [MAC_W-1:0] mac_tx_dst_mac;
 
 wire       mac_rx_err;
 wire       mac_rx_v;
-wire [1:0] mac_rx;
+wire [PHY_W-1:0] mac_rx;
 
 
 wire       phy_rx_v_io_in, phy_rx_v_io_out;
-wire [1:0] phy_rx_io_in, phy_rx_io_out;
+wire [PHY_W-1:0] phy_rx_io_in, phy_rx_io_out;
 wire       phy_rx_v_io_dir;
 wire [1:0] phy_rx_io_dir;
 wire       phy_rx_err_in;
@@ -149,7 +148,7 @@ mac_rx #(
 );
 
 //application
-app_wrapper m_app_wrapper(
+app_wrapper #(.PHY_W(PHY_W)) m_app_wrapper(
 	.clk(clk),
 	.rst_n(rst_n),
 
@@ -168,6 +167,7 @@ app_wrapper m_app_wrapper(
 
 // playpen config
 mac_conf #(
+	.PHY_W(PHY_W),
 	.DEFAULT_VID(DEFAULT_VID),
 	.DEFAULT_MAC(DEFAULT_MAC)
 )m_mac_conf(
@@ -188,5 +188,7 @@ mac_conf #(
 );
 
 // tx mac
+// TODO 
+assign mac_tx_acc = 1'b1;
 
 endmodule
