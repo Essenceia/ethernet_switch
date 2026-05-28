@@ -38,6 +38,7 @@ wire [PHY_W-1:0]  data_rx;
 wire [MAC_W-1:0] data_rx_src_mac; 
 
 wire        mac_tx_v;
+wire        mac_tx_last;
 wire        mac_tx_acc;
 wire [PHY_W-1:0]  mac_tx;
 wire [MAC_W-1:0] mac_tx_dst_mac;
@@ -160,6 +161,7 @@ app_wrapper #(.PHY_W(PHY_W)) m_app_wrapper(
 	.data_src_mac_i(data_rx_src_mac),
 
 	.mac_tx_v_o      (mac_tx_v),
+	.mac_tx_last_o   (mac_tx_last),
 	.mac_tx_acc_i    (mac_tx_acc),
 	.mac_tx_o        (mac_tx),
 	.mac_tx_dst_mac_o(mac_tx_dst_mac)

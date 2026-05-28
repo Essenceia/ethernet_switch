@@ -26,10 +26,11 @@ module app_wrapper #(
 	input wire [PHY_W-1:0] data_i,
 	input wire [MAC_W-1:0]      data_src_mac_i, 
 
-	output wire            mac_tx_v_o,// request and valid
-	input wire             mac_tx_acc_i, // accept
-	output wire [PHY_W-1:0]      mac_tx_o,
-	output wire [MAC_W-1:0]     mac_tx_dst_mac_o// guarantied to not change until packet header has finished sending
+	output wire             mac_tx_v_o,// request and valid
+	output wire             mac_tx_last_o,
+	input wire              mac_tx_acc_i, // accept
+	output wire [PHY_W-1:0] mac_tx_o,
+	output wire [MAC_W-1:0] mac_tx_dst_mac_o// guarantied to not change until packet header has finished sending
 );
 localparam PKT_DATA_W       = 32;
 localparam PKT_DATA_CNT_VAL = (PKT_DATA_W/PHY_W) - 1;
@@ -138,6 +139,7 @@ always @(posedge clk)
 	else res_q <= {{PHY_W{1'b0}}, res_q[RES_W-1:2]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q == TX_REQ) | (tx_fsm_q == TX_STREAM);
+assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (tx_cnt_q == FRAME_CNT);
 assign mac_tx_o = res_q[1:0];
 assign mac_tx_dst_mac_o = data_src_mac_i;
 
