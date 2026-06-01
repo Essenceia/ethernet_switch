@@ -100,12 +100,10 @@ def bitpair_to_bytes(buff):
 	tmp = 0
 	i = 0
 	for b in buff: 
-		inv =(b & 0x2) >> 1 
-		inv |= (b & 0x1) << 1
-		tmp |= inv << 2*(3-(i%4))
-		cocotb.log.info(f"i {i%4} tmp {hex(tmp)} b {hex(b)} inv {hex(inv)}") 
+		tmp |= b << 2*(3-(i%4))
 		i = i+1
 		if ( i % 4 == 0): 
+			cocotb.log.info(f"i {int((i-1)/4)} tmp {hex(tmp)}") 
 			frame.append(tmp)
 			tmp = 0 
 
@@ -122,6 +120,9 @@ async def read_tx_frame(dut):
 		buff.append(dut.phy_tx.value)
 		await ClockCycles(dut.clk, 1)
 	return bitpair_to_bytes(buff)
+
+def raw_tx_to_eth_frame(raw):
+	pass	
 	
 async def send_simple_frame(dut):
 	random.seed(0)

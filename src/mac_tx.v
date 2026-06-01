@@ -88,7 +88,7 @@ assign rst_cnt = (fsm_q == IDLE) | (fsm_q == PAYLOAD)
 always @(posedge clk) 
 	cnt_q <= rst_cnt ? {CNT_W{1'b0}}: cnt_q + {{CNT_W-1{1'b0}}, 1'b1}; 
 	
-assign data_acc_o = (fsm_q == PAYLOAD);
+assign data_acc_o = (fsm_q == PAYLOAD) | ((fsm_q == ETHTYPE) & (cnt_q == ETHTYPE_CNT));
 
 // fcs 
 wire [FCS_W-1:0] pkt_fcs;
@@ -130,7 +130,7 @@ wire sel_preamble_sfd;
 
 assign sel_sfd_last     = (fsm_q == SFD) & (cnt_q == SFD_CNT_MIN_1);
 assign sel_preamble_sfd = (fsm_q == PREAMBLE) | (fsm_q == SFD);
-assign preamble_data = sel_sfd_last? 2'b11 : 2'b10; 
+assign preamble_data = sel_sfd_last? 2'b11 : 2'b01; 
 
 assign phy_o = sel_preamble_sfd ? preamble_data: (fsm_q == PAYLOAD)? data_i: shift_buff_q[BUFF_W-1-:PHY_W];   
 assign phy_v_o = (fsm_q != IDLE);
