@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Mon Jun  1 20:31:40 2026
+[*] Mon Jun  1 21:37:34 2026
 [*]
 [dumpfile] "/home/pitchu/asic/teapot/test/tb.vcd"
-[dumpfile_mtime] "Mon Jun  1 20:22:44 2026"
-[dumpfile_size] 39257
+[dumpfile_mtime] "Mon Jun  1 21:19:53 2026"
+[dumpfile_size] 39184
 [savefile] "/home/pitchu/asic/teapot/test/tb.gtkw"
-[timestart] 3230900
+[timestart] 8174300
 [size] 1910 470
 [pos] -1 -1
-*-15.534533 3388300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-15.534533 8350300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [treeopen] tb.m_dut.
 [treeopen] tb.m_dut.m_mac_tx.
@@ -59,7 +59,7 @@ tb.m_dut.m_app_wrapper.mac_tx_acc_i
 tb.m_dut.m_app_wrapper.tx_cnt_q[7:0]
 @200
 -tx
-@25
+@24
 [color] 2
 tb.m_dut.m_mac_tx.fsm_q[2:0]
 @22
@@ -68,19 +68,21 @@ tb.m_dut.m_mac_tx.pkt_fcs[31:0]
 tb.m_dut.m_mac_tx.data_last_i
 @22
 tb.m_dut.m_mac_tx.shift_buff_q[47:0]
+tb.m_dut.m_mac_tx.data_dst_mac_i[47:0]
 @28
 tb.m_dut.m_mac_tx.phy_o[1:0]
 tb.m_dut.m_mac_tx.phy_v_o
 @200
 -fcs
 @28
+tb.m_dut.m_mac_tx.sel_fcs
 tb.m_dut.m_mac_tx.m_fcs.clk
+@29
 tb.m_dut.m_mac_tx.m_fcs.rst_crc
+@28
 tb.m_dut.m_mac_tx.m_fcs.crc_en
 tb.m_dut.m_mac_tx.m_fcs.data_in[1:0]
 @22
-tb.m_dut.m_mac_tx.m_fcs.lfsr_c[31:0]
 tb.m_dut.m_mac_tx.m_fcs.lfsr_q[31:0]
-tb.m_dut.m_mac_tx.m_fcs.crc_out[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

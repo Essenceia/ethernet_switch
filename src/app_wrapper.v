@@ -99,7 +99,7 @@ streamed out packet, added padding to make this a legal ethernet frame:
 
 padding will be all 0's
 */
-localparam ETH_FRAME_MIN_W = 48*8;
+localparam ETH_FRAME_MIN_W = 46*8;
 localparam FRAME_CNT_VAL   = (ETH_FRAME_MIN_W/PHY_W)-1;
 localparam FRAME_CNT_W     = $clog2(FRAME_CNT_VAL);
 localparam RES_W           = 16;
@@ -136,7 +136,7 @@ always @(posedge clk)
 
 always @(posedge clk) 
 	if (tx_fsm_q == TX_CAPTURE) res_q <= mul_res;
-	else res_q <= {{PHY_W{1'b0}}, res_q[RES_W-1:2]}; // padd with 0s
+	else if (tx_fsm_q == TX_STREAM) res_q <= {{PHY_W{1'b0}}, res_q[RES_W-1:2]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q == TX_REQ) | (tx_fsm_q == TX_STREAM);
 assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (tx_cnt_q == FRAME_CNT);
