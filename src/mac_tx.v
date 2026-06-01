@@ -7,6 +7,17 @@ granted for it to be used to train any model.
 
 `default_nettype none
 
+function [47:0] byteswap(input [47:0] raw);
+	begin
+		byteswap[7:0]   = raw[47:40];
+		byteswap[15:8]  = raw[39:32];
+		byteswap[23:16] = raw[31:24];
+		byteswap[31:24] = raw[23:16];
+		byteswap[39:32] = raw[15:8];
+		byteswap[47:40] = raw[7:0];
+	end
+endfunction
+
 /* MAC TX 
 Send out response packet with accelerator results encapsulated.
 Packet will NOT contain a VLAN tag.
@@ -54,8 +65,8 @@ so append the fcs */
 localparam IDLE     = 3'd0;
 localparam PREAMBLE = 3'd1;
 localparam SFD      = 3'd2;// seperating preamble and sfd to save 16b of ff 
-localparam SRC_MAC  = 3'd3;
-localparam DST_MAC  = 3'd4;
+localparam DST_MAC  = 3'd3;
+localparam SRC_MAC  = 3'd4;
 localparam ETHTYPE  = 3'd5;
 localparam PAYLOAD  = 3'd6;
 localparam FCS      = 3'd7;
@@ -69,9 +80,9 @@ always @(posedge clk)
 		case(fsm_q) 
 			IDLE    : fsm_q <= data_v_i ? PREAMBLE: IDLE; 
 			PREAMBLE: fsm_q <= cnt_q == PREAMBLE_CNT ? SFD: PREAMBLE; 
-			SFD     : fsm_q <= cnt_q == SFD_CNT ? SRC_MAC: SFD; 
-			SRC_MAC : fsm_q <= cnt_q == MAC_CNT ? DST_MAC: SRC_MAC; 
-			DST_MAC : fsm_q <= cnt_q == MAC_CNT ? ETHTYPE: DST_MAC;
+			SFD     : fsm_q <= cnt_q == SFD_CNT ? DST_MAC: SFD; 
+			DST_MAC : fsm_q <= cnt_q == MAC_CNT ? SRC_MAC: DST_MAC;
+			SRC_MAC : fsm_q <= cnt_q == MAC_CNT ? ETHTYPE: SRC_MAC; 
 			ETHTYPE : fsm_q <= cnt_q == ETHTYPE_CNT ? PAYLOAD : ETHTYPE; 
 			PAYLOAD : fsm_q <= data_last_i ? FCS : PAYLOAD;
 			FCS     : fsm_q <= cnt_q == FCS_CNT ? IDLE : FCS;
@@ -108,19 +119,19 @@ wire sel_dst_mac;
 wire sel_ethtype; 
 wire sel_fcs;
 
-assign sel_src_mac = (fsm_q == SFD) & (cnt_q == SFD_CNT);
-assign sel_dst_mac = (fsm_q == SRC_MAC) & (cnt_q == MAC_CNT);
-assign sel_ethtype = (fsm_q == DST_MAC) & (cnt_q == MAC_CNT);
+assign sel_dst_mac = (fsm_q == SFD) & (cnt_q == SFD_CNT);
+assign sel_src_mac = (fsm_q == DST_MAC) & (cnt_q == MAC_CNT);
+assign sel_ethtype = (fsm_q == SRC_MAC) & (cnt_q == MAC_CNT);
 assign sel_fcs     = (fsm_q == PAYLOAD) & data_last_i;
 
 // TODO add a onehot0 attribute if yosys doesn't catch it automatically 
 always @(posedge clk) begin
 	case ({sel_fcs, sel_ethtype, sel_dst_mac, sel_src_mac})
-		4'b0001: shift_buff_q <= phy_mac_i;
-		4'b0010: shift_buff_q <= data_dst_mac_i;
-		4'b0100: shift_buff_q <= {APP_ETHTYPE, {BUFF_W-ETHTYPE_W{1'bX}}};
-		4'b1000: shift_buff_q <= {pkt_fcs, {BUFF_W-FCS_W{1'bX}}};
-		default: shift_buff_q <= {shift_buff_q[BUFF_W-PHY_W-1:0], {PHY_W{1'bX}}}; 
+		4'b0001: shift_buff_q <= byteswap(phy_mac_i);
+		4'b0010: shift_buff_q <= byteswap(data_dst_mac_i);
+		4'b0100: shift_buff_q <= byteswap({APP_ETHTYPE, {BUFF_W-ETHTYPE_W{1'bX}}});
+		4'b1000: shift_buff_q <= byteswap({pkt_fcs, {BUFF_W-FCS_W{1'bX}}});
+		default: shift_buff_q <= {{PHY_W{1'bX}},shift_buff_q[BUFF_W-1:PHY_W]}; 
 	endcase
 end
 
@@ -132,6 +143,6 @@ assign sel_sfd_last     = (fsm_q == SFD) & (cnt_q == SFD_CNT);
 assign sel_preamble_sfd = (fsm_q == PREAMBLE) | (fsm_q == SFD);
 assign preamble_data = sel_sfd_last? 2'b11 : 2'b01; 
 
-assign phy_o = sel_preamble_sfd ? preamble_data: (fsm_q == PAYLOAD)? data_i: shift_buff_q[BUFF_W-1-:PHY_W];   
+assign phy_o = sel_preamble_sfd ? preamble_data: (fsm_q == PAYLOAD)? data_i: shift_buff_q[PHY_W-1:0];   
 assign phy_v_o = (fsm_q != IDLE);
 endmodule	
