@@ -96,7 +96,7 @@ async def phy_stream_frame(dut, raw):
 async def send_simple_frame(dut):
 	random.seed(0)
 	# group dst address
-	frame = eth_frame(b"\xFF\xFF\x00\xFF\x00\xFF",DEVICE_MAC)
+	frame = eth_frame(DEVICE_MAC, b"\xFF\xFF\x00\xFF\x00\xFF")
 	frame.random_body(ethtype = APP_ETHTYPE)
 	await phy_stream_frame(dut,frame.raw())
 
