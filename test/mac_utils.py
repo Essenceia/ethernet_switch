@@ -18,6 +18,7 @@ APP_ETHTYPE = b"\x88\xB5"
 DEFAULT_DEVICE_MAC = b"\x00\x90\xCF\x00\xBE\xEF"
 DEFAULT_VID = b"\x0D\xAD"
 VID_MASK = b"\x0F\xFF"
+PREAMBLE=b"\x55\x55\x55\x55\x55\x55\x55"
 
 class dot1q(NamedTuple):
 	tpid: bytes = b'\x81\x00'
@@ -65,12 +66,14 @@ class eth_frame:
 		else:
 			self.header = MAC_header(dst, src) 
 
-	def raw(self):
+	def raw(self, is_rmii_tx:bool = False):
 		r = bytearray()
 		r += self.header.raw()
 		r += self.body
 		r += crc_utils.calc_fcs(r)
 		r = self.sfd + r
+		if is_rmii_tx:
+			r = bytes(PREAMBLE)	+ r
 		return r
 
 # lsbit first MSByte first
