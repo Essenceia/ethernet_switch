@@ -116,12 +116,8 @@ assign sel_fcs     = (fsm_q == PAYLOAD) & data_last_i;
 wire [BUFF_W-1:0] swap_src_mac, swap_dst_mac, swap_ethertype, swap_fcs;
 byteswap #(.W(BUFF_W/8)) m_swap_src_mac(.i(phy_mac_i),.o(swap_src_mac));
 byteswap #(.W(BUFF_W/8)) m_swap_dst_mac(.i(data_dst_mac_i),.o(swap_dst_mac));
-byteswap #(.W(BUFF_W/8)) m_swap_ethertype(
-	.i({APP_ETHTYPE, {BUFF_W-ETHTYPE_W{1'bX}}}),
-	.o(swap_ethertype));
-byteswap #(.W(BUFF_W/8)) m_swap_fcs(
-	.i({pkt_fcs, {BUFF_W-FCS_W{1'bX}}}),
-	.o(swap_fcs));
+byteswap #(.W(BUFF_W/8)) m_swap_ethertype(.i({APP_ETHTYPE, {BUFF_W-ETHTYPE_W{1'bX}}}),.o(swap_ethertype));
+byteswap #(.W(BUFF_W/8)) m_swap_fcs(.i({pkt_fcs, {BUFF_W-FCS_W{1'bX}}}),.o(swap_fcs));
 
 // TODO add a onehot0 attribute if yosys doesn't catch it automatically 
 always @(posedge clk) begin

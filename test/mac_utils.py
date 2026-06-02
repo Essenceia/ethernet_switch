@@ -128,7 +128,7 @@ def raw_tx_to_eth_frame(raw):
 async def send_simple_frame(dut):
 	random.seed(0)
 	# group dst address
-	frame = eth_frame(dst=DEVICE_MAC, src=b"\x01\xFF\x00\xFF\x00\xFF")
+	frame = eth_frame(dst=DEVICE_MAC, src=b"\x00\xF0\x00\xFF\x00\xFF")
 	frame.random_body(ethtype = APP_ETHTYPE)
 	read_tx_thread = cocotb.start_soon(read_tx_frame(dut))
 	await phy_stream_frame(dut,frame.raw())
