@@ -75,17 +75,20 @@ async def send_and_check_frames(dut,rx : eth_frame):
 		expected = tx_raw.hex()
 		gotten = tx_frame.tobytes().hex()
 		if (expected != gotten): 
-			cocotb.log.error(f"Error, missmatch between expected and gotten\nexp {expected}\ngot {gotten}")
+			cocotb.log.error(f"Error, missmatch between expected and gotten tx ethernet frame\nexp {expected}\ngot {gotten}")
 			debug_string = 4*" "
-			for i, (e, g) in enumerate(zip(expected, gotten)):
-				debug_string = "^" if (e != g) else " "
+			for (e, g) in zip(expected, gotten):
+				debug_string += "^" if (e != g) else " "
 			cocotb.log.error(debug_string)
 			assert(0)
+	# IPG, but shorter
+	await ClockCycles(dut.clk, random.randint(1, 10))
 	
 # Simple test 
 @cocotb.test()
 async def simple_rx_test(dut):
 	random.seed(0)
 	await rst(dut) 
-	await send_and_check_frames(dut, mac_utils.simple_frame())	
+	for _ in range(0, 10):
+		await send_and_check_frames(dut, mac_utils.simple_frame())	
 	await ClockCycles(dut.clk, 150)

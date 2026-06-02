@@ -51,8 +51,7 @@ class eth_frame:
 	def random_body(self, ethtype : bytes(2) =b'\x88\xB5', l:int= 46):
 		body = bytearray(0)
 		for i in range(0,l):
-			#body.append(random.randint(0,255))
-			body.append(0)
+			body.append(random.randint(0,255))
 		self.set_payload(body, ethtype)
 		
 
@@ -79,7 +78,7 @@ class eth_frame:
 # lsbit first MSByte first
 
 async def phy_stream_frame(dut, raw):
-	cocotb.log.info(f"raw frame {raw.hex()}")
+	cocotb.log.debug(f"raw frame {raw.hex()}")
 	preamble = random.randint(1,10)
 	dut.phy_rx_err.value = 0
 	for _ in range(1, preamble):
@@ -110,15 +109,15 @@ def bitpair_to_bytes(buff):
 	i = 0
 	for b in buff: 
 		tmp |= b << 2*(i%4)
-		cocotb.log.info(f"tmp {hex(tmp)} b{hex(b)}") 
+		cocotb.log.debug(f"tmp {hex(tmp)} b{hex(b)}") 
 		i = i+1
 		if ( i % 4 == 0): 
-			cocotb.log.info(f"i {int((i-1)/4)} tmp {hex(tmp)}") 
+			cocotb.log.debug(f"i {int((i-1)/4)} tmp {hex(tmp)}") 
 			frame.append(tmp)
 			tmp = 0 
 
-	cocotb.log.info(f"tx frame {frame.tobytes().hex()} ({len(frame)})") 
-	cocotb.log.info(f"i {i}") 
+	cocotb.log.debug(f"tx frame {frame.tobytes().hex()} ({len(frame)})") 
+	cocotb.log.debug(f"i {i}") 
 	assert(i % 4 == 0)
 	return frame
 
