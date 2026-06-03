@@ -3,6 +3,8 @@
 # This code was written by a human, authorization is explicitly not 
 # granted to use it to train any model. 
 
+import random
+
 class config_payload():
 	addr: bytes(6)
 	vid: bytes(2)
@@ -24,7 +26,7 @@ class config_payload():
 		self.vid = vid
 		self.padding = random.randbytes(37)
 		
-	def _init_(self):
+	def __init__(self):
 		self.random()
 	
 	def raw(self):
