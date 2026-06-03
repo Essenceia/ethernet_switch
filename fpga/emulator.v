@@ -2,33 +2,30 @@
 `default_nettype none
 `endif
 module emulator #(
-	parameter SWITCH_W = 2,
+	parameter SWITCH_W = 3,
 	parameter PMOD_W = 8,
 	parameter LED_W = 16
 )
 (
-    // PmodC
-	input wire clk_bus_i, /* 40 MHz for now */
-   
+	input wire clk_osc_i, /* 100 MHz on board oscillator */
+   	output wire clk_phy_o, /* RMII ref clk 50MHz */
+ 
+	// PmodC
 	input wire  tck_i,
     input wire  tdi_i, 
     input wire  tms_i,
     output wire tdo_o,
 
-	input wire [SWITCH_W-1:0] switch_i,
 
 	// PmodA	
-	input  wire [PMOD_W-1:0]  data_i,  
+	input  wire [1:0]  phy_tx_o,
+	input  wire        phy_tx_v_o,
 	
 	// Pmod B
-	input  wire               data_v_i,
-	input  wire [1:0]         data_mode_i,
-	
-	output wire               res_v_o,
-	
-	// Pmod D
-	output wire [PMOD_W-1:0]  res_o,  
+	inout  wire [PMOD_W-1:0] pin_io,
  
+	// Misc
+	input wire [SWITCH_W-1:0] switch_i,
 	output wire [LED_W-1:0]   led_o,
 
 	output wire [11:0]        unused_o
@@ -48,37 +45,22 @@ wire [7:0] uo_out;
 wire [7:0] uio_out;
 wire [7:0] uio_oe;
 
-reg [PMOD_W-1:0] data_bus_q;
-reg [1:0]        data_mode_bus_q;
-reg              data_v_bus_q;
-(* MARK_DEBUG = "true" *)reg [PMOD_W-1:0] data_q;
-(* MARK_DEBUG = "true" *)reg              data_v_q;
-(* MARK_DEBUG = "true" *)reg [1:0]        data_mode_q;
-
-(* MARK_DEBUG = "true" *)wire [PMOD_W-1:0] res;
-(* MARK_DEBUG = "true" *)wire              res_v;
-reg [PMOD_W-1:0] res_bus_q;
-reg              res_v_bus_q;
-reg [PMOD_W-1:0] res_bus_d2_q;
-reg              res_v_bus_d2_q;
+wire tx_phase_async;
 
 (* MARK_DEBUG = "true" *) wire tck, tdi, tdo, tms; 
 
 /* clk */
 IBUF m_ibuf_clk(
-	.I(clk_bus_i),
+	.I(clk_osc_i),
 	.O(clk_ibuf)
 );
 
-// Global clock based on bus clock, using the same frequency
-// using the inherent jitter filtering capability of the PLL
-// and phase locked on bus clock
-
-
+/* Step down clock from the 100MHz to the desired 50MHz, 
+PLL is totally overkill for such a trivial task */
 PLLE2_BASE #(
-   .CLKFBOUT_MULT(40),        
-   .CLKIN1_PERIOD(50.0),      
-   .CLKOUT0_DIVIDE(40),
+   .CLKFBOUT_MULT(10),        
+   .CLKIN1_PERIOD(10.0),      
+   .CLKOUT0_DIVIDE(20),
    .DIVCLK_DIVIDE(1)
 ) m_global_clk_pll (
    .CLKFBIN(clk_pll_feedback),
@@ -102,27 +84,20 @@ BUFG m_bufg_clk(
 	.O(clk)
 );
 
-always @(posedge clk) begin
-	data_bus_q      <= data_i;
-	data_q          <= data_bus_q;
-
-	data_mode_bus_q <= data_mode_i;
-	data_mode_q     <= data_mode_bus_q;
-
-	data_v_bus_q <= data_v_i;
-	data_v_q     <= data_v_bus_q;
-end
-
-/* keeping the same timing distortions between both directions */ 
-always @(posedge clk) begin
-	res_v_bus_q    <= res_v;
-	res_v_bus_d2_q <= res_v_bus_q;
-	res_bus_q      <= res;
-	res_bus_d2_q   <= res_bus_q;
-end
-
-assign res_o = res_bus_d2_q;
-assign res_v_o = res_v_bus_d2_q;
+/* refclk out */
+ODDR #(
+	.DDR_CLK_EDGE("SAME_EDGE"),
+	.INIT(1'b1),
+	.SRCTYPE("ASYNC")
+) m_oddr_refclk(
+	.Q(clk_phy_o),
+	.C(clk),
+	.CE(1'b1),
+	.D1(1'b1),
+	.D2(1'b0),
+	.R(rst_async),
+	.S(1'b0)
+);
 
 /* debug leds */
 assign led_o[0] = rst_async;
@@ -130,8 +105,7 @@ assign led_o[1] = ena;
 assign led_o[2] = clk_ibuf;
 assign led_o[3] = pll_lock_q; 
 
-assign led_o[10:4] = res_bus_q[6:0];
-assign led_o[11]   = res_v_bus_q;
+assign led_o[11:4] = 8'd0;
 
 assign led_o[12]    = tck;
 assign led_o[13]    = tdi;
@@ -140,8 +114,16 @@ assign led_o[15]    = tdo;
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
-/* rst */
+/* switch, okay with bounce */
 assign rst_async = switch_i[0];
+assign tx_phase_async = switch[1];
+
+debounce m_switch_debounce(
+	.clk(clk),
+	.rst_async(rst_async),
+	.switch_i(switch_i[2]),
+	.switch_o(ena)
+);
 
 always @(posedge clk or posedge rst_async) begin
 	if (rst_async) begin
@@ -151,12 +133,7 @@ always @(posedge clk or posedge rst_async) begin
 	end
 end
 
-debounce m_switch_debounce(
-	.clk(clk),
-	.rst_async(rst_async),
-	.switch_i(switch_i[1]),
-	.switch_o(ena)
-);
+
 /* jtag */
 assign tck   = tck_i;
 assign tdi   = tdi_i; 
@@ -168,7 +145,7 @@ assign ui_in[0]    = tck;
 assign ui_in[1]    = tms;
 assign ui_in[2]    = tdi;
 assign ui_in[6:3]  = 4'h0;
-assign ui_in[7]    = tx_phase_raw;
+assign ui_in[7]    = tx_phase_async;
 
 io_switch #(.W(8)) m_io_switch(
 	.dir_sel_i(uio_oe),
@@ -177,8 +154,8 @@ io_switch #(.W(8)) m_io_switch(
 	.pin_io(pin_io)
 );
 
-assign phy_tx_data   = uo_out[1:0];
-assign phy_tx_v      = uo_out[2];
+assign phy_tx_o      = uo_out[1:0];
+assign phy_tx_v_o    = uo_out[2];
 assign tdo           = uo_out[3];
 assign uo_out_unused = uo_out[7:4];
 
