@@ -83,11 +83,12 @@ always @(posedge clk)
 	if (fsm_q == IDLE) cnt_q <= {PKT_DATA_CNT_W{1'b0}};
 	else cnt_q <= cnt_q + {{PKT_DATA_CNT_W-1{1'b0}}, 1'b1};
 
-localparam BUF_W = PKT_DATA_W;
-reg  [BUF_W-1:0] buff_q;
+localparam BUF_W     = PKT_DATA_W;
+localparam BUF_PAD_W = (BUF_W+7/8)*8; // rounder up to byte boundary
 
-wire [7:0] buff_next = buff_q[BUF_W-1-:8];
-wire [47:0] mac_t = buff_q[BUF_W-1-:MAC_W];
+reg  [BUF_W-1:0]     buff_q;
+wire [BUF_PAD_W-1:0] buff_pad;
+wire [BUF_PAD_W-1:0] swap_buff_pad;
 
 always @(posedge clk) 
 	if (~rst_n) 
@@ -95,8 +96,11 @@ always @(posedge clk)
 	else if (fsm_q == CONF)
 		buff_q <= {data_i, buff_q[BUF_W-1:PHY_W]};
 		
-assign clk_phase_sel_o = buff_q[1];
-assign mac_addr_o = buff_q[BUF_W-1-:MAC_W];
-assign vid_o = buff_q[BUF_W-MAC_W-1-:VID_W];
+assign buff_pad = {{BUF_PAD_W-BUF_W{1'b0}}, buff_q};
+byteswap #(.W(BUF_PAD_W/8)) m_buff_swap(.i(buff_pad), .o(swap_buff_pad));
+
+assign mac_addr_o      = swap_buff_pad[BUF_PAD_W-1-:MAC_W];
+assign vid_o           = swap_buff_pad[BUF_PAD_W-MAC_W-1-:VID_W];
+assign clk_phase_sel_o = swap_buff_pad[BUF_PAD_W-MAC_W-VID_W-1];
 
 endmodule
