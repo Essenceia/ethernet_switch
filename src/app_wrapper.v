@@ -70,7 +70,7 @@ always @(posedge clk)
 	else rx_cnt_q <= rx_cnt_q + {{PKT_DATA_CNT_W-1{1'b0}}, 1'b1}; 
 
 always @(posedge clk) 
-	payload_q <= {payload_q[PKT_DATA_W-PHY_W-1:0], data_i}; 
+	if (rx_fsm_q == RX_DATA) payload_q <= {payload_q[PKT_DATA_W-PHY_W-1:0], data_i}; 
 
 /* accelerator */
 wire [15:0] mul_res;
@@ -85,10 +85,14 @@ wire [15:0] mul_res;
  * validated during emulation on the FPGA with the actual 
  * requests and results sent over ethernet. This will likely 
  * be about as fast as simulating it anyways. */
-wire [15:0] mul_raw_carry, mul_raw; 
+wire [15:0] mul_raw_carry, mul_raw;
+reg  [15:0] mul_res_q;
 assign {mul_raw_carry, mul_raw} = payload_q[31:16]* payload_q[15:0]; 
 // clamping
-assign mul_res = |mul_raw_carry ? {16{1'b1}} : mul_raw; 
+always @(posedge clk) 
+	mul_res_q <= |mul_raw_carry ? {16{1'b1}} : mul_raw; 
+
+assign mul_res = mul_res_q; 
  
 `else
 
@@ -132,9 +136,10 @@ localparam TX_CAPTURE = 2'b01;
 localparam TX_REQ     = 2'b10;
 localparam TX_STREAM  = 2'b11;
 
-reg [1:0] tx_fsm_q;
-reg [FRAME_CNT_W-1:0] tx_cnt_q;
-reg [RES_W-1:0] res_q;
+reg  [1:0] tx_fsm_q;
+reg  [FRAME_CNT_W-1:0] tx_cnt_q;
+wire [RES_W-1:0] swap_mul_res;
+reg  [RES_W-1:0] res_q;
  
 always @(posedge clk) begin
 	if (~rst_n) 
@@ -153,13 +158,15 @@ always @(posedge clk)
 	if (tx_fsm_q == TX_REQ) tx_cnt_q <= {FRAME_CNT_W{1'b0}};
 	else if (mac_tx_acc_i) tx_cnt_q <= tx_cnt_q + {{FRAME_CNT_W-1{1'b0}}, 1'b1};
 
+byteswap #(.W(RES_W/8)) m_swap_mul_res(.i(mul_res), .o(swap_mul_res));
+
 always @(posedge clk) 
-	if (tx_fsm_q == TX_CAPTURE) res_q <= mul_res;
-	else if (tx_fsm_q == TX_STREAM) res_q <= {{PHY_W{1'b0}}, res_q[RES_W-1:2]}; // padd with 0s
+	if (tx_fsm_q == TX_CAPTURE) res_q <= swap_mul_res;
+	else if (tx_fsm_q == TX_STREAM) res_q <= {{PHY_W{1'b0}}, res_q[RES_W-1:PHY_W]}; // padd with 0s
 
 assign mac_tx_v_o = (tx_fsm_q == TX_REQ) | (tx_fsm_q == TX_STREAM);
 assign mac_tx_last_o = (tx_fsm_q == TX_STREAM) & (tx_cnt_q == FRAME_CNT);
-assign mac_tx_o = res_q[1:0];
+assign mac_tx_o = res_q[PHY_W-1:0];
 assign mac_tx_dst_mac_o = data_src_mac_i;
 
 endmodule

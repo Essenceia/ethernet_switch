@@ -222,7 +222,7 @@ assign data_v_o       = delay_data_v_q[DELAY_DEPTH-1];
 assign data_conf_o    = pkt_conf_q; 
 assign data_start_o   = delay_data_start_q[DELAY_DEPTH-1]; 
 assign data_err_o     = err_q;
-assign data_o         = buff_q[FCS_W+1:FCS_W];
+assign data_o         = buff_q[BUF_W-FCS_W-1-:PHY_W];
 assign data_src_mac_o = src_mac_q;
 
 `ifdef FORMEL 
