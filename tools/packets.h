@@ -1,13 +1,6 @@
-#ifndef PACKETS_HPP
-#define PACKETS_HPP
-
-#include <cstdint>
-#include <stdfloat>
-#if __STDCPP_BFLOAT16_T__ != 1
-    #error "bfloat16 type required"
-#endif
-
-using namespace std;
+#ifndef PACKETS_H
+#define PACKETS_H
+#include <stdint.h>
 
 struct eth_header_t{
 	uint8_t dst_mac[6];
@@ -17,8 +10,8 @@ struct eth_header_t{
 
 struct app_packet_t{
 	eth_header_t header;
-	bfloat16_t a;
-	bfloat16_t b; 
+	uint16_t a; // bf16
+	uint16_t b; // bf16
 	uint8_t padd[42];
 } __attribute__((packed));
 
@@ -30,4 +23,4 @@ struct conf_packet_t{
 	uint8_t padd[38];
 } __attribute__((packed));
 
-#endif // PACKETS_HPP
+#endif // PACKETS_H

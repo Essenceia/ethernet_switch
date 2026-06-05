@@ -1,13 +1,16 @@
 BIN_NAME=test
-SRC=$(wildcard *.cpp) $(wildcard *.hpp)
+SRC=$(wildcard *.c) $(wildcard *.h)
 
-.PHONY: build clean 
+.PHONY: build clean trace
+
 
 build: ${SRC}
-	g++ -std=c++23 -o ${BIN_NAME} ${SRC}
+	gcc -o ${BIN_NAME} ${SRC}
 
-test: ${BIN_NAME}
-	${BIN_NAME} 
+#debug network socket/connection failures
+trace: build 
+	strace ${BIN_NAME} ${ARGS}
 
 clean:
 	rm -f ./${BIN_NAME}
+	rm -f ./vgcore*
