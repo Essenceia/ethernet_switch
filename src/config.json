@@ -34,7 +34,10 @@
 
   "//": "Configuration docs: https://librelane.readthedocs.io/en/latest/reference/configuration.html",
   "LINT_VLT": "dir::../conf/waiver.vlt",
+  "FALLBACK_SDC_FILE": "src/base.sdc",
+  
   "SYNTH_AUTONAME": "True",
+  
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",
