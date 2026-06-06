@@ -2,7 +2,7 @@ BIN_NAME=test
 DEFAULT_ETH=enp2s0
 SRC=$(wildcard *.c) $(wildcard *.h)
 
-.PHONY: build clean trace
+.PHONY: build clean trace run
 
 
 build: ${SRC}
