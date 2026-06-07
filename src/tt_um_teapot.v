@@ -25,6 +25,8 @@ module tt_um_teapot #(
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
+reg rst_n_d1_q;
+reg rst_n_d2_q; 
 
 wire [VID_W-1:0] vid; 
 wire [MAC_W-1:0] mac_addr;
@@ -99,10 +101,16 @@ assign uo_out[7:4] = 4'd0;
 wire ena_unused; 
 assign ena_unused = ena; 
 
+// rst flop, only used sequentially 
+always @(posedge clk) begin
+	rst_n_d1_q <= rst_n;
+	rst_n_d2_q <= rst_n_d1_q;
+end
+
 // rmii 
 rmii m_rmii(
 	.clk(clk),
-	.rst_n(rst_n),
+	.rst_n(rst_n_d2_q),
 
 	.clk_phase_sel_i(clk_phase_sel),
 
@@ -134,7 +142,7 @@ mac_rx #(
 	.CONF_ETHTYPE(CONF_ETHTYPE)
 )m_mac_rx(
 	.clk(clk),
-	.rst_n(rst_n),
+	.rst_n(rst_n_d2_q),
 
 	.phy_mac_i(mac_addr),
 	.vid_i(vid),
@@ -154,7 +162,7 @@ mac_rx #(
 //application
 app_wrapper #(.PHY_W(PHY_W)) m_app_wrapper(
 	.clk(clk),
-	.rst_n(rst_n),
+	.rst_n(rst_n_d2_q),
 
 	.data_v_i      (data_rx_v),
 	.data_conf_i   (data_rx_conf),
@@ -177,7 +185,7 @@ mac_conf #(
 	.DEFAULT_MAC(DEFAULT_MAC)
 )m_mac_conf(
 	.clk(clk),
-	.rst_n(rst_n),
+	.rst_n(rst_n_d2_q),
 
 	.default_tx_phase_i(default_tx_phase),
 	
@@ -198,7 +206,7 @@ mac_tx #(
 	.APP_ETHTYPE(APP_ETHTYPE)
 ) m_mac_tx(
 	.clk(clk),
-	.rst_n(rst_n),
+	.rst_n(rst_n_d2_q),
 	
 	.phy_mac_i(mac_addr),// conf
 	
