@@ -51,7 +51,7 @@ module mac_conf #(
 0                    47            63             71       383 
  
 */
-localparam PKT_DATA_W       = (MAC_W + VID_PAD_W + PHASE_PAD_W);
+localparam PKT_DATA_W       = (MAC_W + 2*8);
 localparam PKT_DATA_CNT_VAL = (PKT_DATA_W/PHY_W) - 1;
 localparam PKT_DATA_CNT_W   = $clog2(PKT_DATA_CNT_VAL);
 /* verilator lint_off WIDTHTRUNC */
@@ -92,19 +92,8 @@ wire [BUF_W-1:0] swap_buff;
 wire [BUF_W-1:0] rst_conf;
 wire [BUF_W-1:0] swap_rst_conf;
 
-assign rst_conf = { DEFAULT_MAC, {4{1'bx}}, DEFAULT_VID , {7{1'bx}}, default_tx_phase_i}; 
-/* byteswap needs to be done manualy as synth can't identify this as the
- * assignement of a constant signal when we have it pass though the byteswap
- * module. buffer is 8 bytes long */
-assign swap_rst_conf[1*8-1-:8] = DEFAULT_MAC[MAC_W-0*8-1-:8];
-assign swap_rst_conf[2*8-1-:8] = DEFAULT_MAC[MAC_W-1*8-1-:8];
-assign swap_rst_conf[3*8-1-:8] = DEFAULT_MAC[MAC_W-2*8-1-:8];
-assign swap_rst_conf[4*8-1-:8] = DEFAULT_MAC[MAC_W-3*8-1-:8];
-assign swap_rst_conf[5*8-1-:8] = DEFAULT_MAC[MAC_W-4*8-1-:8];
-assign swap_rst_conf[6*8-1-:8] = DEFAULT_MAC[MAC_W-5*8-1-:8];
-assign swap_rst_conf[7*8-1-:8] = { {4{1'bx}}, DEFAULT_VID[VID_W-1:8]};
-assign swap_rst_conf[8*8-1-:8] = DEFAULT_VID[8-1:0];
-assign swap_rst_conf[9*8-1-:8] = { {7{1'bx}}, default_tx_phase_i};
+assign rst_conf = { DEFAULT_MAC, default_tx_phase_i, {3{1'bx}}, DEFAULT_VID};
+byteswap #(.W(BUF_W/8)) m_swap_rst_conf(.i(rst_conf), .o(swap_rst_conf)); 
 
 always @(posedge clk) 
 	if (~rst_n) 
@@ -115,7 +104,7 @@ always @(posedge clk)
 byteswap #(.W(BUF_W/8)) m_buff_swap(.i(buff_q), .o(swap_buff));
 
 assign mac_addr_o      = swap_buff[BUF_W-1-:MAC_W];
-assign vid_o           = swap_buff[BUF_W-MAC_W-(VID_PAD_W-VID_W)-1-:VID_W];
-assign clk_phase_sel_o = swap_buff[0];
+assign vid_o           = swap_buff[VID_W-1:0];
+assign clk_phase_sel_o = swap_buff[15];
 
 endmodule
