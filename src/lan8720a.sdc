@@ -6,14 +6,13 @@ set ref_clk [get_clocks $::env(CLOCK_PORT)]
 set out_clk [get_clocks $::env(OUTPUT_CLOCK)]
 
 # output direction (input to the ASIC) RXD[1:0], RXER, CRS_DV (RXV)
-set rx_pins {uio_in[0] uio_in[1] uio_in[2] uio_in[3]}
 # valid from rising edge of refclk
 set toval 14
 # hold from rising edge of refclk
 set tohold 3
 
-set_input_delay -clock ${ref_clk} -max ${toval} ${rx_pins}
-set_input_delay -clock ${ref_clk} -min ${tohold} ${rx_pins} 
+set_input_delay -clock ${ref_clk} -max ${toval} $::env(PHY_RX_PINS)
+set_input_delay -clock ${ref_clk} -min ${tohold} $::env(PHY_RX_PINS) 
 
 # input direction (output from the ASIC) TXD[1:0] TXEN (TXV)  
 set tx_pins {uo_out[0] uo_out[1] uo_out[2]}
@@ -22,7 +21,7 @@ set tsu 4
 # input hold time after rising edge of refclk
 set tihold 1.5
 
-set_output_delay -clock ${out_clk} -max ${tsu} ${tx_pins} 
-set_output_delay -clock ${out_clk} -min ${tihold} ${tx_pins} 
+set_output_delay -clock ${out_clk} -max ${tsu} $::env(PHY_TX_PINS)
+set_output_delay -clock ${out_clk} -min ${tihold} $::env(PHY_TX_PINS)
 
 

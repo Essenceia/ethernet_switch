@@ -38,4 +38,8 @@ set_max_delay 11 -from [get_port $::env(CLOCK_PORT)] -to [get_all_dff_clk_port $
 
 set_propagated_clock [all_clocks]
 
+
+set ::env(PHY_RX_PINS) {uio_in[0] uio_in[1] uio_in[2] uio_in[3]}
+set ::env(PHY_TX_PINS) {uo_out[0] uo_out[1] uo_out[2]}
+
 read_sdc $::env(DESIGN_DIR)/lan8720a.sdc

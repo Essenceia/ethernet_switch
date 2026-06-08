@@ -76,17 +76,20 @@ set_property BITSTREAM.CONFIG.CONFIGRATE 33 [current_design]
 set_property CONFIG_MODE SPIx4 [current_design]
 
 # refclk 
-create_generated_clock -name clk_phy_o -source [get_pins -hier -regexp ".*m_oddr_refclk/C"]  -divide_by 1 [get_ports clk_phy_o]
+set ::env(OUTPUT_CLOCK) "clk_phy_o"
+create_generated_clock -name $::env(OUTPUT_CLOCK) -source [get_pins -hier -regexp ".*m_oddr_refclk/C"]  -divide_by 1 [get_ports $::env(OUTPUT_CLOCK)]
 
 # oscillator
-set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports clk_osc_i]
-create_clock -add -name clk_osc_i -period 10.00 -waveform {0 5} [get_ports clk_osc_i]
+set osc_clk "clk_osc_i"
+set_property -dict { PACKAGE_PIN W5   IOSTANDARD LVCMOS33 } [get_ports $osc_clk]
+create_clock -add -name $osc_clk -period 10.00 -waveform {0 5} [get_ports $osc_clk]
+# pll
+set ::env(CLOCK_PORT) "clk"
+# clock creation infered by tools and pll params
+
 
 # set data delays
-# assuming clk and data are affected by the same delay 
-# IOVDD at 3,3V according to the RP2040 datashete electrical 
-# characteristics of the pinnout, adding a bit extra for safety
-#set_input_delay -clock [get_clocks clk_bus_i] -min 0.0 [get_ports -regexp data_.*]
-#set_input_delay -clock [get_clocks clk_bus_i] -max 11.2 [get_ports -regexp data_.*]
-#set_output_delay -clock [get_clocks clk_bus_i] -min -1.0 [get_ports -regexp res.*]
-#set_output_delay -clock [get_clocks clk_bus_i] -max 5.5 [get_ports -regexp res.*]
+set ::env(PHY_RX_PINS) {m_top/uio_in[0] m_top/uio_in[1] m_top/uio_in[2] m_top/uio_in[3]}
+set ::env(PHY_TX_PINS) {m_top/uo_out[0] m_top/uo_out[1] m_top/uo_out[2]}
+
+read_sdc ../src/lan8720a.sdc
