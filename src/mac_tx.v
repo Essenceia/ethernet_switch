@@ -41,10 +41,6 @@ localparam [CNT_W-1:0] MAC_CNT      = 6 * (8/PHY_W) - 1;
 localparam [CNT_W-1:0] ETHTYPE_CNT  = 2 * (8/PHY_W) - 1; 
 localparam [CNT_W-1:0] FCS_CNT      = 4 * (8/PHY_W) - 1; 
 
-localparam [CNT_W-1:0] SFD_CNT_MIN_1      = SFD_CNT - 1; 
-localparam [CNT_W-1:0] ETHTYPE_CNT_MIN_1  = ETHTYPE_CNT - 1; 
-localparam [CNT_W-1:0] MAC_CNT_MIN_1      = MAC_CNT - 1; 
-
 localparam FCS_W = 32;
 /* 
 fsm
@@ -115,17 +111,7 @@ reg [BUFF_W-1:0] shift_buff_q;
 wire sel_src_mac;
 wire sel_dst_mac;
 wire sel_ethtype; 
-reg sel_src_mac_q;
-reg sel_dst_mac_q;
-reg sel_ethtype_q; 
 wire sel_fcs;
-
-always @(posedge clk) begin
-	sel_dst_mac_q <= (fsm_q == SFD) & (cnt_q == SFD_CNT_MIN_1);
-	sel_src_mac_q <= (fsm_q == DST_MAC) & (cnt_q == MAC_CNT_MIN_1);
-	sel_ethtype_q <= (fsm_q == SRC_MAC) & (cnt_q == MAC_CNT_MIN_1);
-end
-
 
 assign sel_dst_mac = (fsm_q == SFD) & (cnt_q == SFD_CNT);
 assign sel_src_mac = (fsm_q == DST_MAC) & (cnt_q == MAC_CNT);

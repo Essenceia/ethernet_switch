@@ -20,10 +20,8 @@ on each sync reset.
 `define BYTE_PAD(x) (((x + 7)/8)*8)
 module mac_conf #(
 	localparam VID_W       = 12,
-	localparam VID_PAD_W   = `BYTE_PAD(VID_W),
 	localparam MAC_W       = 48,
 	localparam PHASE_W     = 1,	
-	localparam PHASE_PAD_W = `BYTE_PAD(PHASE_W),	
 	parameter PHY_W = 2,
 	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
 	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel beef 
