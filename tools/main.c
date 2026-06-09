@@ -42,11 +42,17 @@ int main(int argc, char * argv[]){
 		return -1;
 	}
 
-	printf("%s mac address :", eth_intf_name);
+	printf("%s mac address ", eth_intf_name);
 	print_mac(device_mac_addr);
 
 	/* validate command line argument for asic dst mac */
-	// TODO 
+	if (argc > 2){
+		if(parse_mac(argv[2], (uint8_t*)asic_mac_addr) < 0){
+			printf("malformed mac address argument, got %s", argv[2]);
+		}
+	}
+	printf("asic mac address ");
+	print_mac(asic_mac_addr);
 
 	/* resolve dst address */
 	struct sockaddr_ll sock_addr; 
@@ -64,14 +70,14 @@ int main(int argc, char * argv[]){
 	/* send app packet */
     ssize_t sent;
 
-	for (int i = 0; i < 1000; i++){
+	for (int i = 0; i < 500000; i++){
 		if(sendto(sock, raw_app_pkt, APP_PACKET_LENGTH, 0,(struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0){
 			//close(sock);
 			free(raw_app_pkt);
 			return -1;
 		}
-		printf("%04d message has sucesfully been sent\n", i);
-		usleep(10000);
+		if (i % 1000 == 0)printf("%04d message has sucesfully been sent\n", i);
+		usleep(150);
 	}
 
 	//close(sock);
