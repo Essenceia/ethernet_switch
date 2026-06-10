@@ -52,6 +52,16 @@ create_clock -add -name tck_i -period 500.00 [get_ports tck_i]
 set_property -dict { PACKAGE_PIN N17   IOSTANDARD LVCMOS33  } [get_ports {tms_i}];
 set_property -dict { PACKAGE_PIN P18   IOSTANDARD LVCMOS33  } [get_ports {tdo_o}];
 
+#Pmod Header JXADC
+set_property -dict { PACKAGE_PIN J3   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[0]}];#Sch name = XA1_P
+set_property -dict { PACKAGE_PIN L3   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[1]}];#Sch name = XA2_P
+set_property -dict { PACKAGE_PIN M2   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[2]}];#Sch name = XA3_P
+set_property -dict { PACKAGE_PIN N2   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[3]}];#Sch name = XA4_P
+set_property -dict { PACKAGE_PIN K3   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[4]}];#Sch name = XA1_N
+set_property -dict { PACKAGE_PIN M3   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[5]}];#Sch name = XA2_N
+set_property -dict { PACKAGE_PIN M1   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[6]}];#Sch name = XA3_N
+set_property -dict { PACKAGE_PIN N1   IOSTANDARD LVCMOS33 } [get_ports {JXADC_o[7]}];#Sch name = XA4_N
+
 # tie unused pins
 set_property -dict { PACKAGE_PIN W7   IOSTANDARD LVCMOS33 } [get_ports {unused_o[0]}]
 set_property -dict { PACKAGE_PIN W6   IOSTANDARD LVCMOS33 } [get_ports {unused_o[1]}]

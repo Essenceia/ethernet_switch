@@ -35,7 +35,8 @@ module rmii(
 	input wire        mac_tx_v_i,
 	input wire [1:0]  mac_tx_i
 );
-localparam       RST_CNT_W = 4;
+localparam  T_RST_IA = (100000 / 50); // rst input assert time: 100 us 
+localparam       RST_CNT_W = $clog2(T_RST_IA);
 localparam [RST_CNT_W-1:0] RST_CYCLES = {RST_CNT_W{1'b1}};
 localparam [RST_CNT_W-1:0] RST_RELEASE_CNT = {{RST_CNT_W-1{1'b0}}, 1'b1};
 
@@ -67,9 +68,9 @@ reg       phy_rx_v_dir_q;
 reg [1:0] phy_rx_dir_q;
 always @(posedge clk) 
 	if (~rst_n) 
-		{phy_rx_v_dir_q, phy_rx_dir_q} <= {3{1'b1}};
-	else if ( &(~rst_cnt_q) )
-		{phy_rx_v_dir_q, phy_rx_dir_q} <= {3{1'b0}};
+		{phy_rx_v_dir_q, phy_rx_dir_q} <= {3{1'b1}}; // outputs for config
+	else if ( phy_rst_n_q ) // hold config after rst deasserted, this is safe since conf sets valid = 0
+		{phy_rx_v_dir_q, phy_rx_dir_q} <= {3{1'b0}}; // configure as inputs
 assign phy_rx_v_dir_o = phy_rx_v_dir_q;
 assign phy_rx_dir_o   = phy_rx_dir_q;
 

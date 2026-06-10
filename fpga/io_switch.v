@@ -21,6 +21,10 @@ module io_switch #(
 	inout  wire [W-1:0] pin_io
 );
 
+(* MARK_DEBUG = "true" *)wire [W-1:0] sel;
+(* MARK_DEBUG = "true" *)wire [W-1:0] debug_data_in;
+assign sel = dir_sel_i;
+assign debug_data_in = data_in_o;
 // tristate buff for out dir
 genvar i; 
 generate 
@@ -29,7 +33,7 @@ generate
 			.O(data_in_o[i]),
 			.I(data_out_i[i]),
 			.IO(pin_io[i]),
-			.T(dir_sel_i[i])
+			.T(sel)
 		); 
 	end
 endgenerate

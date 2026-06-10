@@ -1,6 +1,5 @@
-`ifndef USE_GATE_NL
 `default_nettype none
-`endif
+
 module emulator #(
 	parameter SWITCH_W = 3,
 	parameter PMOD_W = 8,
@@ -23,6 +22,9 @@ module emulator #(
 	
 	// Pmod B
 	inout  wire [PMOD_W-1:0] pin_io,
+
+	// Pmod XADC
+	output wire [7:0] JXADC_o,
  
 	// Misc
 	input wire [SWITCH_W-1:0] switch_i,
@@ -47,7 +49,7 @@ wire [7:0] uio_oe;
 
 wire tx_phase_async;
 
-(* MARK_DEBUG = "true" *) wire tck, tdi, tdo, tms; 
+wire tck, tdi, tdo, tms; 
 
 /* clk */
 IBUF m_ibuf_clk(
@@ -98,6 +100,7 @@ ODDR #(
 	.R(rst_async),
 	.S(1'b0)
 );
+// deplicate used to easily observe signal on led
 wire dup; 
 ODDR #(
 	.DDR_CLK_EDGE("SAME_EDGE"),
@@ -169,11 +172,15 @@ io_switch #(.W(8)) m_io_switch(
 	.pin_io(pin_io)
 );
 
+(* MARK_DEBUG = "true" *) wire [1:0] debug_phy_tx;
+(* MARK_DEBUG = "true" *) wire       debug_phy_tx_v;
+assign debug_phy_tx_v = phy_tx_v_o;
+assign debug_phy_tx = phy_tx_o;
+
 assign phy_tx_o      = uo_out[1:0];
 assign phy_tx_v_o    = uo_out[2];
 assign tdo           = uo_out[3];
 assign uo_out_unused = uo_out[7:4];
-
 
 tt_um_teapot m_top(
 	.ui_in(ui_in),
@@ -185,5 +192,10 @@ tt_um_teapot m_top(
 	.clk(clk),
 	.rst_n(~rst_async)
 );
+
+// debug 
+assign JXADC_o[7:4] = 4'hf;
+assign JXADC_o[3:1] = 3'hf;
+assign JXADC_o[0] = ena;
 
 endmodule

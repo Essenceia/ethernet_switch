@@ -53,11 +53,15 @@ wire       mac_rx_v;
 wire [PHY_W-1:0] mac_rx;
 
 
-wire       phy_rx_v_io_in, phy_rx_v_io_out;
-wire [PHY_W-1:0] phy_rx_io_in, phy_rx_io_out;
+(* MARK_DEBUG = "true" *) wire             phy_rx_v_io_in;
+(* MARK_DEBUG = "true" *) wire [PHY_W-1:0] phy_rx_io_in;
+(* MARK_DEBUG = "true" *) wire             phy_rx_err_in;
+
+wire             phy_rx_v_io_out;
+wire [PHY_W-1:0] phy_rx_io_out;
+
 wire       phy_rx_v_io_dir;
 wire [1:0] phy_rx_io_dir;
-wire       phy_rx_err_in;
 wire       phy_rst_n;
 
 // IO

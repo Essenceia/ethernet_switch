@@ -22,7 +22,7 @@ if { [current_hw_target] ne "" } {
 } else {
 	puts "Error : no hw target detected !"
 }
-
+disconnect_hw_server
 close_hw_manager
 exit 0
 
