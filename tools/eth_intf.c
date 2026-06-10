@@ -24,3 +24,11 @@ void print_mac(const mac_addr_t mac_addr){
 	uint8_t* mac = (uint8_t*)mac_addr;
 	printf("%02x:%02x:%02x:%02x:%02x:%02x\n",mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
+
+int parse_mac(const char *mac_str, uint8_t mac[6]) {
+    int parsed = sscanf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x",
+                        &mac[0], &mac[1], &mac[2],
+                        &mac[3], &mac[4], &mac[5]);
+    if (parsed != 6) return -1;
+    return 0;
+}
