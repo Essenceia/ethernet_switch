@@ -23,7 +23,7 @@ module io_switch #(
 
 (* MARK_DEBUG = "true" *)wire [W-1:0] sel;
 (* MARK_DEBUG = "true" *)wire [W-1:0] debug_data_in;
-assign sel = dir_sel_i;
+assign sel = ~dir_sel_i;
 assign debug_data_in = data_in_o;
 // tristate buff for out dir
 genvar i; 
