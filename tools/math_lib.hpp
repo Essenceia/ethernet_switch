@@ -2,9 +2,14 @@
 #define MATH_LIB_HPP
 
 #include <cstdint>
-#include <stdfloat>
-#if __STDCPP_BFLOAT16_T__ != 1
-    #error "bfloat16 type required"
-#endif
+
+void init_bf16();
+
+/* bfloat16 implementation follows the asic implementations
+- no support for: subnormal, nan, inf
+- round towards zero rounding */
+uint16_t mul_bf16(uint16_t a, uint16_t b);
+
+void print_bf16(uint16_t a);
 
 #endif // MATH_LIB_HPP

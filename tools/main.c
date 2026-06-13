@@ -67,20 +67,18 @@ int main(int argc, char * argv[]){
 	/* create application packet */
 	uint16_t a = 0xBEEF;
 	uint16_t b = 0xCAFE;
-	a = 0;
-	b = 0;
 	uint8_t *raw_app_pkt = create_app_packet(asic_mac_addr, device_mac_addr, a,b);
 	print_packet(raw_app_pkt, APP_PACKET_LENGTH);
 	/* send app packet */
     ssize_t sent;
 
-	for (int i = 0; i < 50000; i++){
+	for (int i = 0; i < 50; i++){
 		if(sendto(sock, raw_app_pkt, APP_PACKET_LENGTH, 0,(struct sockaddr *)&sock_addr, sizeof(sock_addr)) < 0){
 			//close(sock);
 			free(raw_app_pkt);
 			return -1;
 		}
-		if (i % 1000 == 0)printf("%04d message has sucesfully been sent\n", i);
+		printf("%04d message has sucesfully been sent\n", i);
 		usleep(100);
 	}
 
