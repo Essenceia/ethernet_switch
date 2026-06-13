@@ -19,7 +19,7 @@ set tx_pins {uo_out[0] uo_out[1] uo_out[2]}
 # setup time to rising edge for the refclk
 set tsu 4
 # input hold time after rising edge of refclk
-set tihold 1.5
+set tihold -1.5
 
 set_output_delay -clock ${out_clk} -max ${tsu} $::env(PHY_TX_PINS)
 set_output_delay -clock ${out_clk} -min ${tihold} $::env(PHY_TX_PINS)

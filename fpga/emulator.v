@@ -6,36 +6,22 @@ module emulator #(
 	parameter LED_W = 16
 )
 (
-   	output wire clk_phy_o, /* RMII ref clk 50MHz */
+   	input wire clk_phy_i, /* RMII ref clk 50MHz */
  
-	// PmodC
-	input wire  tck_i,
-    input wire  tdi_i, 
-    input wire  tms_i,
-    output wire tdo_o,
+	// PmodC	
+	inout  wire [1:0]  phy_rx_i,
+	inout  wire        phy_rx_v_i,
+	inout  wire        phy_rx_err_i,
+	output  wire [1:0] phy_tx_o,
+	output  wire       phy_tx_v_o,
 
-
-	// PmodA	
-	output  wire [1:0]  phy_tx_o,
-	output  wire        phy_tx_v_o,
-	
-	// Pmod B
-	inout  wire [1:0]        phy_rx_io,
-	inout  wire              phy_rx_v_io,
-	inout  wire              phy_rx_err_io,
-	input wire               clk_osc_i, /* 50 MHz */
-	output wire              phy_rst_n_o,
-
-	// Pmod XADC
-	output wire [7:0] JXADC_o,
- 
 	// Misc
 	input wire [SWITCH_W-1:0] switch_i,
 	output wire [LED_W-1:0]   led_o,
 
 	output wire [11:0]        unused_o
 );
-wire [3:0] uo_out_unused; 
+wire [4:0] uo_out_unused; 
 
 wire clk_ibuf, clk_pll, clk_pll_feedback, clk;
 wire pll_lock;
@@ -52,16 +38,12 @@ wire [7:0] uio_oe;
 
 wire tx_phase_async;
 
-wire tck, tdi, tdo, tms; 
-
 /* clk */
 IBUF m_ibuf_clk(
-	.I(clk_osc_i),
+	.I(clk_phy_i),
 	.O(clk_ibuf)
 );
 
-/* Step down clock from the 100MHz to the desired 50MHz, 
-PLL is totally overkill for such a trivial task */
 PLLE2_BASE #(
    .CLKFBOUT_MULT(20),        
    .CLKIN1_PERIOD(20.0),      
@@ -89,54 +71,24 @@ BUFG m_bufg_clk(
 	.O(clk)
 );
 
-/* refclk out */
-ODDR #(
-	.DDR_CLK_EDGE("SAME_EDGE"),
-	.INIT(1'b1),
-	.SRTYPE("ASYNC")
-) m_oddr_refclk(
-	.Q(clk_phy_o),
-	.C(clk),
-	.CE(1'b1),
-	.D1(1'b1),
-	.D2(1'b0),
-	.R(rst_async),
-	.S(1'b0)
-);
-// deplicate used to easily observe signal on led
-wire dup; 
-ODDR #(
-	.DDR_CLK_EDGE("SAME_EDGE"),
-	.INIT(1'b1),
-	.SRTYPE("ASYNC")
-) m_oddr_refclk_dup(
-	.Q(dup),
-	.C(clk),
-	.CE(1'b1),
-	.D1(1'b1),
-	.D2(1'b0),
-	.R(rst_async),
-	.S(1'b0)
-);
-
 /* debug leds */
 assign led_o[0] = rst_async;
-assign led_o[1] = ena;
-assign led_o[2] = clk_ibuf;
-assign led_o[3] = pll_lock_q; 
-assign led_o[4] = dup; 
+assign led_o[1] = tx_phase_async;
+assign led_o[2] = ena;
+assign led_o[3] = clk;
 
-assign led_o[11:5] = 7'd0;
-
-assign led_o[12]    = tck;
-assign led_o[13]    = tdi;
-assign led_o[14]    = tms;
-assign led_o[15]    = tdo;
+assign led_o[5:4] = phy_rx_i;
+assign led_o[6]   = phy_rx_v_i;
+assign led_o[7]   = phy_rx_err_i;
+assign led_o[9:8] = phy_tx_o;
+assign led_o[10]  = phy_tx_v_o;
+assign led_o[11]  = pll_lock_q; 
+assign led_o[15:12] = 4'd0;
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
 /* switch, okay with bounce */
-assign rst_async = switch_i[0];
+assign rst_async      = switch_i[0];
 assign tx_phase_async = switch_i[1];
 
 debounce m_switch_debounce(
@@ -155,35 +107,31 @@ always @(posedge clk or posedge rst_async) begin
 end
 
 
-/* jtag */
-assign tck   = tck_i;
-assign tdi   = tdi_i; 
-assign tms   = tms_i; 
-assign tdo_o = tdo; 
 
 /* deisgn top level */ 
-assign ui_in[0]    = tck;
-assign ui_in[1]    = tms;
-assign ui_in[2]    = tdi;
-assign ui_in[6:3]  = 4'h0;
-assign ui_in[7]    = tx_phase_async;
-
-io_switch #(.W(4)) m_io_switch(
-	.dir_sel_i(uio_oe[3:0]),
-	.data_out_i(uio_out[3:0]),
-	.data_in_o(uio_in[3:0]),
-	.pin_io({phy_rx_err_io, phy_rx_v_io, phy_rx_io})
-);
-
 (* MARK_DEBUG = "true" *) wire [1:0] debug_phy_tx;
 (* MARK_DEBUG = "true" *) wire       debug_phy_tx_v;
 assign debug_phy_tx_v = phy_tx_v_o;
-assign debug_phy_tx = phy_tx_o;
+assign debug_phy_tx   = phy_tx_o;
 
+// IN
+assign ui_in[1:0] = phy_rx_i;
+assign ui_in[2]   = phy_rx_v_i;
+assign ui_in[3]   = phy_rx_err_i;
+assign ui_in[6:4] = {3{1'bx}};
+assign ui_in[7]    = tx_phase_async;
+
+// OUT
 assign phy_tx_o      = uo_out[1:0];
 assign phy_tx_v_o    = uo_out[2];
-assign tdo           = uo_out[3];
-assign uo_out_unused = uo_out[7:4];
+assign uo_out_unused = uo_out[7:3];
+
+// IO
+wire [7:0] uio_oe_unused, uio_out_unused;
+
+assign uio_in = {8{1'bx}};
+assign uio_oe_unused = uio_oe;
+assign uio_out_unused = uio_out; 
 
 tt_um_teapot m_top(
 	.ui_in(ui_in),
@@ -195,10 +143,5 @@ tt_um_teapot m_top(
 	.clk(clk),
 	.rst_n(~rst_async)
 );
-
-// debug 
-assign JXADC_o[7:4] = 4'hf;
-assign JXADC_o[3:1] = 3'hf;
-assign JXADC_o[0] = ena;
 
 endmodule
