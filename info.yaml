@@ -34,10 +34,10 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: "tck"
-  ui[1]: "tms"
-  ui[2]: "tdi"
-  ui[3]: ""
+  ui[0]: "phy_rx_data[0]"
+  ui[1]: "phy_rx_data[1]"
+  ui[2]: "phy_rx_v"
+  ui[3]: "phy_rx_err"
   ui[4]: ""
   ui[5]: ""
   ui[6]: ""
@@ -47,21 +47,21 @@ pinout:
   uo[0]: "phy_tx_data[0]"
   uo[1]: "phy_tx_data[1]"
   uo[2]: "phy_tx_v"
-  uo[3]: "tdo"
+  uo[3]: ""
   uo[4]: ""
   uo[5]: ""
   uo[6]: ""
   uo[7]: ""
 
   # Bidirectional pins
-  uio[0]: "phy_rx_data[0]"
-  uio[1]: "phy_rx_data[1]"
-  uio[2]: "phy_rx_v"
-  uio[3]: "phy_rx_err"
+  uio[0]: ""
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
   uio[4]: ""
   uio[5]: ""
   uio[6]: ""
-  uio[7]: "phy_rst_n"
+  uio[7]: ""
 
 # Do not change!
 yaml_version: 6
