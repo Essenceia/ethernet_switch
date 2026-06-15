@@ -37,7 +37,7 @@ reg       clk_phase_sel_q;
 
 
 always @(posedge ref_clk) 
-	clk_phase_sel_q <= clk_phase_sel_i;
+	if (~rst_n)clk_phase_sel_q <= clk_phase_sel_i;
 
 `ifdef SCL_gf180mcu_fd_sc_mcu7t5v0
 gf180mcu_fd_sc_mcu7t5v0__clkinv_1 m_ref_clk_inv(

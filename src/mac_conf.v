@@ -21,7 +21,6 @@ on each sync reset.
 module mac_conf #(
 	localparam VID_W       = 12,
 	localparam MAC_W       = 48,
-	localparam PHASE_W     = 1,	
 	parameter PHY_W = 2,
 	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
 	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel beef 
@@ -30,23 +29,20 @@ module mac_conf #(
 	input wire clk, 
 	input wire rst_n,
 
-	input wire             default_tx_phase_i, 
-	
 	input wire             data_v_i,
 	input wire             data_conf_i,
 	input wire             data_start_i,
 	input wire             data_err_i,
 	input wire [PHY_W-1:0] data_i,
 
-	output wire             clk_phase_sel_o,
 	output wire [VID_W-1:0] vid_o,
 	output wire [MAC_W-1:0] mac_addr_o
 );
 
 /* Configuration packet types :
 
-[ MAC address [47:0] ][ VID [15:0] ][ phase [7:0] ][ padding ]
-0                    47            63             71       383 
+[ MAC address [47:0] ][ padding ][ VID [11:0] ][ padding ]
+0                    47         51            63       383 
  
 */
 localparam PKT_DATA_W       = (MAC_W + 2*8);
@@ -73,7 +69,7 @@ always @(posedge clk) begin
 	else begin
 		case(fsm_q)
 			IDLE: fsm_q <=  data_start_i & ~data_err_i & data_conf_i ? CONF: IDLE; 
-			CONF: fsm_q <=  cnt_q == PKT_DATA_CNT ? IDLE: CONF;
+			CONF: fsm_q <=  cnt_q == PKT_DATA_CNT | (data_v_i & data_err_i) ? IDLE: CONF;
 		endcase
 	end
 end
@@ -85,12 +81,14 @@ always @(posedge clk)
 localparam BUF_W = PKT_DATA_W;
 
 reg  [BUF_W-1:0] buff_q;
+/* verilator lint_off UNUSEDSIGNAL */
 wire [BUF_W-1:0] swap_buff;
+/* verilator lint_on UNUSEDSIGNAL */
 
 wire [BUF_W-1:0] rst_conf;
 wire [BUF_W-1:0] swap_rst_conf;
 
-assign rst_conf = {DEFAULT_MAC, DEFAULT_VID, {3{1'bx}}, default_tx_phase_i};
+assign rst_conf = {DEFAULT_MAC, DEFAULT_VID, {4{1'bx}}};
 byteswap #(.W(BUF_W/8)) m_swap_rst_conf(.i(rst_conf), .o(swap_rst_conf)); 
 
 always @(posedge clk) 
@@ -103,6 +101,5 @@ byteswap #(.W(BUF_W/8)) m_buff_swap(.i(buff_q), .o(swap_buff));
 
 assign mac_addr_o      = swap_buff[BUF_W-1-:MAC_W];
 assign vid_o           = swap_buff[VID_W-1:0];
-assign clk_phase_sel_o = swap_buff[15];
 
 endmodule

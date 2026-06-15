@@ -8,24 +8,17 @@ import random
 class config_payload():
 	addr: bytes(6)
 	vid: bytes(2) #bottom 12 bits
-	phase: bytes(1) # bottom 1 bit
-	padding: bytearray(37)
+	padding: bytearray(38)
 
 	def random(self):
 		self.addr = random.randbytes(6)
 		self.vid   = random.randbytes(2)
-		self.phase = random.randbytes(1)
-		self.padding = bytearray(36)#random.randbytes(37)
-		self.padding.append(255)
+		self.padding = random.randbytes(38)
 
-	def set(self, addr: bytes(6), vid: bytes(2), phase:bool):
-		if (phase):
-			self.phase = b"\x01"
-		else:
-			self.phase = b"\x00"
+	def set(self, addr: bytes(6), vid: bytes(2)):
 		self.addr = addr
 		self.vid = vid
-		self.padding = bytes(37)#random.randbytes(37)
+		self.padding = bytes(38)
 		
 	def __init__(self):
 		self.random()
@@ -34,21 +27,15 @@ class config_payload():
 		r = bytearray()
 		r += self.addr
 		r += self.vid
-		r += self.phase
 		r += self.padding
 		assert len(r) == 46, f"expected 46, got length {len(r)} value {r.hex()}"
 		return r
 	
 	def __str__(self) -> str:
-		s = ""
+		s = " mac="
 		for i, b in enumerate(self.addr):
 			if i: 
 				s += ":" 
 			s += f"{b:02x}"
-		s+= " "+self.vid.hex()[0:3]+" "
-		if self.phase[0] & 0x01 :	
-			s += "1"
-		else: 
-			s += "0"
-		s+= "("+self.phase.hex()[0]+")"
+		s+= " vid="+self.vid.hex()[0:3]+" "
 		return s

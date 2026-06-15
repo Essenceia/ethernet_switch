@@ -30,7 +30,6 @@ reg rst_n_d2_q;
 
 wire [VID_W-1:0] vid; 
 wire [MAC_W-1:0] mac_addr;
-wire        clk_phase_sel;
 
 wire        data_rx_v;
 wire        data_rx_conf;
@@ -95,7 +94,7 @@ rmii m_rmii(
 	.clk(clk),
 	.rst_n(rst_n_d2_q),
 
-	.clk_phase_sel_i(clk_phase_sel),
+	.clk_phase_sel_i(default_tx_phase),
 
 	.phy_tx_v_o(phy_tx_v),
 	.phy_tx_o(phy_tx),
@@ -163,8 +162,6 @@ mac_conf #(
 	.clk(clk),
 	.rst_n(rst_n_d2_q),
 
-	.default_tx_phase_i(default_tx_phase),
-	
 	.data_v_i    (data_rx_v),
 	.data_conf_i (data_rx_conf),
 	.data_start_i(data_rx_start),
@@ -172,8 +169,7 @@ mac_conf #(
 	.data_i      (data_rx),
 
 	.vid_o          (vid),
-	.mac_addr_o     (mac_addr),
-	.clk_phase_sel_o(clk_phase_sel)
+	.mac_addr_o     (mac_addr)
 );
 
 // tx mac

@@ -55,7 +55,7 @@ are not store and forwarded. Any corrupted packets will result in a corrupted co
 
 **Packet**:
 ```
-[ dst mac (6 Bytes) ][ src mac (6 Bytes) ][ ethtype = 0x88B6 (2 Bytes) ][ New MAC (6 Bytes) ][ TX data to ref clock offset (1 bit) ][ padding (2 bits)][ VID (12 bits)][ padding (38 Bytes) ][ FCS (4 Bytes) ]
+[ dst mac (6 Bytes) ][ src mac (6 Bytes) ][ ethtype = 0x88B6 (2 Bytes) ][ New MAC (6 Bytes) ][ padding (3 bits)][ VID (12 bits)][ padding (38 Bytes) ][ FCS (4 Bytes) ]
 0
 ```
 
@@ -77,13 +77,14 @@ If a packet isn't vlan tagged, it is assumed to belong to our current VLAN.
 
 Default VLAN ID: `0xDAD`
 
+## Configuration pins
+
 ##### TX data to reference clock phase offset
 To comphensate for the output data to reference clock offset induced by the delay on the path from the clock 
 input pin, to the tiny tapeout design's data out flip-flop and back to the output pin, the reference 
 clock for the data out flip flop is selectable, allowing us to use a 180 degree dephased reference clock. 
 
-This dephasing configuration is captured during reset depending on the state of the `tx_phase` pin, and will 
-then be configured at runtime based on the config packet content. 
+This dephasing configuration is captured during reset depending on the state of the `tx_phase` pin. 
 
 Values: 
 - `0` no phase shift
