@@ -94,10 +94,19 @@ async def filter_rx_test(dut):
 async def update_eth_config(dut):
 	random.seed(0)
 	await rst(dut)
-	await send_frame(dut, mac_utils.simple_config(new_mac = random.randbytes(6)))
+	device_mac = mac_utils.DEFAULT_DEVICE_MAC
+	for _ in range(0,10):
+		new_mac = random.randbytes(6)
+		frame, config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
+		await send_frame(dut, frame)
+		dut_mac = int(dut.m_dut.mac_addr.value).to_bytes(6, byteorder='big')
+		dut_vid = int(dut.m_dut.vid.value).to_bytes(2, byteorder='big')
+		assert dut_mac == config.addr, f"missmatch mac config, config sent {config} got addr {dut_mac.hex()}"
+		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.vid.value}"
+		device_mac = new_mac
 	await ClockCycles(dut.clk, 10)
 
-@cocotb.test()
+@cocotb.test(skip=True if GATES == "yes" else False)
 async def update_mac_check_filter(dut):
 	random.seed(0)
 	await rst(dut)

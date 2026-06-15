@@ -177,4 +177,4 @@ def simple_config(dst_mac : bytes(6) = DEFAULT_DEVICE_MAC, new_mac: bytes(6) = r
 	frame.set_payload(payload = conf_pkt.raw(), ethtype = CONF_ETHTYPE)
 	cocotb.log.info(f"config: {conf_pkt}\n{conf_pkt.raw().hex()}")
 	cocotb.log.info(f"{frame.raw().hex()}")
-	return frame
+	return frame, conf_pkt

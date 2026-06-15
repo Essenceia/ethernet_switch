@@ -88,7 +88,7 @@ wire [BUF_W-1:0] swap_buff;
 wire [BUF_W-1:0] rst_conf;
 wire [BUF_W-1:0] swap_rst_conf;
 
-assign rst_conf = {DEFAULT_MAC, DEFAULT_VID, {4{1'bx}}};
+assign rst_conf = {DEFAULT_MAC, {4{1'bx}}, DEFAULT_VID};
 byteswap #(.W(BUF_W/8)) m_swap_rst_conf(.i(rst_conf), .o(swap_rst_conf)); 
 
 always @(posedge clk) 

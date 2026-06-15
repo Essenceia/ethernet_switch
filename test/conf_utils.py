@@ -12,12 +12,16 @@ class config_payload():
 
 	def random(self):
 		self.addr = random.randbytes(6)
-		self.vid   = random.randbytes(2)
+		tmp_vid = bytearray(random.randbytes(2))
+		tmp_vid[0] = 0x0F & tmp_vid[0] 
+		self.vid = tmp_vid
 		self.padding = random.randbytes(38)
 
 	def set(self, addr: bytes(6), vid: bytes(2)):
 		self.addr = addr
-		self.vid = vid
+		tmp_vid = bytearray(vid)
+		tmp_vid[0] = 0x0F & tmp_vid[0] 
+		self.vid = tmp_vid 
 		self.padding = bytes(38)
 		
 	def __init__(self):
