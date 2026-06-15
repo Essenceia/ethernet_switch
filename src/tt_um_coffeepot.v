@@ -7,14 +7,10 @@ granted to use it to train any model.
 
 `default_nettype none
 
-module tt_um_teapot #(
+module tt_um_coffeepot #(
 	localparam PHY_W = 2,
 	localparam VID_W = 12,
 	localparam MAC_W = 48,
- 	parameter [15:0]      APP_ETHTYPE  = 16'h88B5,
-	parameter [15:0]      CONF_ETHTYPE = 16'h88B6, 
-	parameter [VID_W-1:0] DEFAULT_VID = 12'hDAD,
-	parameter [MAC_W-1:0] DEFAULT_MAC = 48'h0090CF00BEEF // nortel manifacturer
 )(
 	input  wire [7:0] ui_in,    
     output wire [7:0] uo_out,   
