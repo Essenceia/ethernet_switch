@@ -1,3 +1,6 @@
 [submodule "src/bf16"]
 	path = src/bf16
 	url = https://github.com/Essenceia/BFloat16
+[submodule "src/sram"]
+	path = src/sram
+	url = git@github.com:RTimothyEdwards/gf180mcu_ocd_ip_sram.git
