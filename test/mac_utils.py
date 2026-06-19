@@ -119,18 +119,24 @@ def bitpair_to_bytes(buff):
 	return frame
 
 async def read_tx_frame(dut, port_idx : int) -> bytes:
-	buff = array('B') 
-	while True: # do while
+	buff = array('B')
+	# wait for start of frame 
+	while True: 
 		v, _ = phy_utils.get_tx(dut, idx = port_idx)
-		if v != 1:
+		if v == 1:
 			break
 		await ClockCycles(dut.clk, 1)
+	# read frame
 	while True: 
 		v, data = phy_utils.get_tx(dut, idx = port_idx)
-		if (v == 1):
+		if v == 1:
 			buff.append(data)
+		else: 
+			break
 		await ClockCycles(dut.clk, 1)
-	assert len(buff) == (64+8)*4, f"got len {len(buff)}"
+
+	assert len(buff) == (64+8)*4, f"read frame TX{port_idx} got frame len {len(buff)}/{(64+8)*4}"
+	cocotb.log.info(f"read frame TX{port_idx} finished")
 	return bitpair_to_bytes(buff)
 
 async def check_no_tx_frame(dut, port_idx: int, timeout:int = 150) -> None:
@@ -138,6 +144,7 @@ async def check_no_tx_frame(dut, port_idx: int, timeout:int = 150) -> None:
 		v, data  = phy_utils.get_tx(dut, idx = port_idx)
 		assert v == 0, f"Error, unexpected TX{port_idx} response got valid = {v} data = {data}"
 		await ClockCycles(dut.clk, 1)
+	cocotb.log.info(f"check no frame TX{port_idx} finished")
 		
 # { expect result boolean, result }
 def expected_response(req: eth_frame, device_mac : bytes(6) = DEFAULT_DEVICE_MAC) -> tuple[bool, eth_frame]:

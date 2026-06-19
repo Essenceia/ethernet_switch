@@ -77,6 +77,8 @@ async def send_and_check_frames(dut, rx: {int, mac_utils.eth_frame}, tx: {int, m
 					debug_string += "^" if (e != g) else " "
 				cocotb.log.error(debug_string)
 				assert(0)
+		else:
+			await tx_thread
 			
 # Simple broadcast test with enogth gap between rx and tx
 # packets such that all broadcast TXs are free 
