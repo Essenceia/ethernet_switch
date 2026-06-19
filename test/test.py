@@ -46,18 +46,18 @@ async def rst(dut, ena=1 ):
 
 # send only, do not check for response
 async def send_frame(dut, port_idx:int, rx: mac_utils.eth_frame):
-	await mac_utils.phy_stream_frame(dut, port_idx, rx.raw())
+	await mac_utils.write_rx_frame(dut, port_idx, rx.raw())
 
 async def send_and_check_frames(dut, rx: {int, mac_utils.eth_frame}, tx: {int, mac_utils.eth_frame}):
 	write_rx_thread = []
 	read_tx_thread = []
 	for i in range(0, phy_utils.PORT_CNT):
 		if rx[i] is not None:
-			write_rx_thread.append(cocotb.start_soon(mac_utils.phy_stream_frame(dut, i, rx[i].raw())))
+			write_rx_thread.append(cocotb.start_soon(mac_utils.write_rx_frame(dut, port_idx = i, raw = rx[i].raw())))
 		if tx[i] is not None:
-			read_tx_thread.append(cocotb.start_soon(mac_utils.read_tx_frame(dut, i)))
+			read_tx_thread.append(cocotb.start_soon(mac_utils.read_tx_frame(dut, port_idx = i)))
 		else:		
-			read_tx_thread.append(cocotb.start_soon(mac_utils.check_no_tx_frame(dut, i)))
+			read_tx_thread.append(cocotb.start_soon(mac_utils.check_no_tx_frame(dut, port_idx = i)))
 	# send rx
 	for rx_thread in write_rx_thread: 
 		await rx_thread

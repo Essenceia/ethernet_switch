@@ -80,7 +80,7 @@ class eth_frame:
 
 # lsbit first MSByte first
 
-async def phy_stream_frame(dut, port_idx:int, raw):
+async def write_rx_frame(dut, port_idx:int, raw):
 	cocotb.log.debug(f"raw frame to RX{port_idx}: {raw.hex()}")
 	preamble = random.randint(1,10)
 	for _ in range(1, preamble):
@@ -118,21 +118,25 @@ def bitpair_to_bytes(buff):
 	assert(i % 4 == 0)
 	return frame
 
-async def read_tx_frame(dut) -> bytes:
+async def read_tx_frame(dut, port_idx : int) -> bytes:
 	buff = array('B') 
-	while( dut.phy_tx_v.value != 1):
+	while True: # do while
+		v, _ = phy_utils.get_tx(dut, idx = port_idx)
+		if v != 1:
+			break
 		await ClockCycles(dut.clk, 1)
-	while (dut.phy_tx_v.value == 1):
-		buff.append(dut.phy_tx.value)
+	while True: 
+		v, data = phy_utils.get_tx(dut, idx = port_idx)
+		if (v == 1):
+			buff.append(data)
 		await ClockCycles(dut.clk, 1)
 	assert len(buff) == (64+8)*4, f"got len {len(buff)}"
 	return bitpair_to_bytes(buff)
 
-async def check_no_tx_frame(dut, timeout:int = 150) -> None:
+async def check_no_tx_frame(dut, port_idx: int, timeout:int = 150) -> None:
 	for _ in range(0, timeout):
-		if (dut.phy_tx_v.value == 1):
-			cocotb.log.error("Error, unexpected tx response")
-			assert(0)
+		v, data  = phy_utils.get_tx(dut, idx = port_idx)
+		assert v == 0, f"Error, unexpected TX{port_idx} response got valid = {v} data = {data}"
 		await ClockCycles(dut.clk, 1)
 		
 # { expect result boolean, result }

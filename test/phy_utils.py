@@ -29,14 +29,14 @@ def get_tx(dut, idx: LogicArray) -> Tuple[LogicArray, LogicArray]:
 	data = 0
 	match idx: 
 		case 0:
-			valid = dut.phy_rx0_v.value
-			data = dut.phy_rx0.value
+			valid = dut.phy_tx0_v.value
+			data = dut.phy_tx0.value
 		case 1:
-			valid = dut.phy_rx1_v.value
-			data = dut.phy_rx1.value
+			valid = dut.phy_tx1_v.value
+			data = dut.phy_tx1.value
 		case 2:
-			valid = dut.phy_rx2_v.value
-			data = dut.phy_rx2.value
+			valid = dut.phy_tx2_v.value
+			data = dut.phy_tx2.value
 	return valid, data
 
 def set_all_rx(dut, v:LogicArray, data:LogicArray, err:LogicArray):
