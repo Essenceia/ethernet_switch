@@ -19,7 +19,8 @@ module mac_rx #(
 	input wire              rx_err_i,
 
 	output wire             data_v_o, 
-	output wire [PHY_W-1:0] data_o
+	output wire [PHY_W-1:0] data_o,
+	output wire             data_start_o
 ); 
 localparam SFD_W = 8; 
 localparam [SFD_W-1:0] SFD = 8'b11010101; 
@@ -31,6 +32,7 @@ localparam FRAME      = 2'd2;
 localparam IGNORE     = 2'd3;
  
 reg [1:0] fsm_q;
+reg       sof_q; // start of frame
 
 localparam BUF_W = 8;
 reg  [BUF_W-1:PHY_W] buff_q;
@@ -67,9 +69,12 @@ always @(posedge clk)
 // detect SFD
 assign frame_start = swap_buff[SFD_W-1:0] == SFD; 
 
+always @(posedge clk) 
+	sof_q <= (fsm_q == DETECT_SFD) & frame_start;
+
 // no use keeping track of errors, as soon as we are valid 
 // it is to late and we will be forwarding the packet anyways
 assign data_v_o       = (fsm_q == FRAME);
 assign data_o         = buff_q[BUF_W-1-:PHY_W];
-
+assign data_start_o   = sof_q; 
 endmodule

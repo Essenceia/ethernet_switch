@@ -16,7 +16,7 @@ module aiguilleur #(
 	input wire new_dispatch_i, 
 	input wire [PORT_CNT-2:0] dir_i,
 
-	input wire [PORT_CNT-2:0]       mac_rx_v_i,
+	input wire [PORT_CNT-2:0]           mac_rx_v_i,
 	input wire [(PORT_CNT-1)*PHY_W-1:0] mac_rx_i,
 
 	output wire             mac_tx_v_o,

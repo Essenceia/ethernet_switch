@@ -10,9 +10,6 @@ granted to use it to train any model.
 module dispatcher_broadcast #(
 	localparam PORT_CNT = 3
 )(
-	input wire clk,
-	input wire rst_n, 
-
 	input wire [PORT_CNT-1:0] new_req_i, 
 	input wire [PORT_CNT-1:0] free_i,
 

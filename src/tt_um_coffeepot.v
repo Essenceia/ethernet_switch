@@ -44,6 +44,7 @@ wire             phy_rx_err[PORT_CNT-1:0];
 wire [PHY_W-1:0] phy_rx[PORT_CNT-1:0];
 
 wire             mac_rx_v[PORT_CNT-1:0];
+wire             mac_rx_start[PORT_CNT-1:0];
 wire [PHY_W-1:0] mac_rx[PORT_CNT-1:0];
 // RX0
 assign phy_rx[0][0]  = ui_in[0];
@@ -62,8 +63,8 @@ assign phy_rx_v[2]   = uio_in[2];
 assign phy_rx_err[2] = uio_in[3];  
 
 // lookup to tx
-wire             mac_tx_v[PORT_CNT-1:0];
-wire [PHY_W-1:0] mac_tx[PORT_CNT-1:0];
+wire             rmii_tx_v[PORT_CNT-1:0];
+wire [PHY_W-1:0] rmii_tx[PORT_CNT-1:0];
 
 wire             phy_tx_v[PORT_CNT-1:0];
 wire [PHY_W-1:0] phy_tx[PORT_CNT-1:0];
@@ -80,6 +81,12 @@ assign uio_out[5] = phy_tx[2][0];
 assign uio_out[6] = phy_tx[2][1];
 assign uio_out[7] = phy_tx_v[2];
 
+// switch <-> mac tx
+wire             mac_tx_v[PORT_CNT-1:0];
+wire [PHY_W-1:0] mac_tx[PORT_CNT-1:0];
+wire             mac_tx_last[PORT_CNT-1:0];
+wire             mac_tx_acc[PORT_CNT-1:0];
+
 genvar i; 
 generate 
 	for(i = 0; i < PORT_CNT; i=i+1) begin: g_channel
@@ -95,8 +102,8 @@ generate
 			.mac_rx_v_o  (rmii_rx_v[i]),
 			.mac_rx_o    (rmii_rx[i]),
 			.mac_rx_err_o(rmii_rx_err[i]),
-			.mac_tx_v_i(mac_tx_v[i]),
-			.mac_tx_i  (mac_tx[i])
+			.mac_tx_v_i(rmii_tx_v[i]),
+			.mac_tx_i  (rmii_tx[i])
 		);
 
 		mac_rx m_mac_rx(
@@ -106,20 +113,35 @@ generate
 			.rx_i(rmii_rx[i]),
 			.rx_err_i(rmii_rx_err[i]),
 			.data_v_o(mac_rx_v[i]),
+			.data_start_o(mac_rx_start[i]),
 			.data_o(mac_rx[i])
 		);
 
 		mac_tx m_mac_tx(
 			.clk(clk),
 			.rst_n(rst_n_q),
-			.data_v_i(),
-			.data_last_i(),
-			.data_i(),
-			.tx_v_o(mac_tx_v[i]),
-			.tx_o(mac_tx[i])
+			.data_v_i(mac_tx_v[i]),
+			.data_i(mac_tx[i]),
+			.data_last_i(mac_tx_last[i]),
+			.data_acc_o(mac_tx_acc[i]),
+			.tx_v_o(rmii_tx_v[i]),
+			.tx_o(rmii_tx[i])
 		);
 
 	end
 endgenerate
 
+switch m_switch(
+	.clk(clk), 
+	.rst_n(rst_n_q), 
+	.mac_rx_v_i({mac_rx_v[2], mac_rx_v[1], mac_rx_v[0]}),
+	.mac_rx_i({mac_rx[2], mac_rx[1], mac_rx[0]}),
+	.mac_rx_start_i({mac_rx_start[2], mac_rx_start[1], mac_rx_start[0]}),
+	
+	.mac_tx_v_o({mac_tx_v[2], mac_tx_v[1], mac_tx_v[0]}),
+	.mac_tx_o({mac_tx[2], mac_tx[1], mac_tx[0]}),
+	.mac_tx_last_o({mac_tx_last[2], mac_tx_last[1], mac_tx_last[0]}),
+	
+	.mac_tx_acc_i({mac_tx_acc[2], mac_tx_acc[1], mac_tx_acc[0]})
+);
 endmodule
