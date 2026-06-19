@@ -31,6 +31,10 @@ reg rst_n_q;
 always @(posedge clk) 
 	rst_n_q <= rst_n; 
 
+// tx phase
+wire tx_phase;
+assign tx_phase = uio_in[4];
+
 // rx to mac rx
 wire             rmii_rx_v[PORT_CNT-1:0];
 wire             rmii_rx_err[PORT_CNT-1:0];
@@ -84,6 +88,7 @@ generate
 		rmii m_rmii(
 			.clk(clk),
 			.rst_n(rst_n_q),
+			.clk_phase_sel_i(tx_phase),
 			.phy_tx_v_o(phy_tx_v[i]),
 			.phy_tx_o  (phy_tx[i]),
 			.phy_rx_v_i  (phy_rx_v[i]),
