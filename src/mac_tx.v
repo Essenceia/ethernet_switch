@@ -23,7 +23,8 @@ module mac_tx #(
 	input wire             data_v_i, 
 	input wire             data_last_i, 
 	input wire [PHY_W-1:0] data_i, 
-	output wire            data_acc_o, // accept payload, start streaming
+
+	output wire            data_acc_o, 
 
 	output wire             tx_v_o,
 	output wire [PHY_W-1:0] tx_o	
@@ -65,7 +66,7 @@ assign rst_cnt = (fsm_q == IDLE)
 always @(posedge clk) 
 	cnt_q <= rst_cnt ? {CNT_W{1'b0}}: cnt_q + {{CNT_W-1{1'b0}}, 1'b1}; 
 	
-assign data_acc_o = (fsm_q == PACKET) | ((fsm_q == SFD) & (cnt_q == SFD_CNT));
+assign data_acc_o = (fsm_q == IDLE);
 
 // preamble + sfd
 wire [PHY_W-1:0] preamble_data; 

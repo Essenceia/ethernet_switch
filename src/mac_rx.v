@@ -19,7 +19,6 @@ module mac_rx #(
 	input wire              rx_err_i,
 
 	output wire             data_v_o, 
-	output wire             data_err_o,
 	output wire [PHY_W-1:0] data_o
 ); 
 localparam SFD_W = 8; 
@@ -29,9 +28,9 @@ localparam [SFD_W-1:0] SFD = 8'b11010101;
 localparam IDLE       = 2'd0; 
 localparam DETECT_SFD = 2'd1;
 localparam FRAME      = 2'd2; 
+localparam IGNORE     = 2'd3;
  
 reg [1:0] fsm_q;
-reg       err_q; 
 
 localparam BUF_W = 8;
 reg  [BUF_W-1:PHY_W] buff_q;
@@ -46,8 +45,9 @@ always @(posedge clk) begin
 	else begin
 		case(fsm_q)
 			IDLE:       fsm_q <= rx_v_i ? DETECT_SFD : IDLE;
-			DETECT_SFD: fsm_q <= frame_start ? FRAME: DETECT_SFD;
+			DETECT_SFD: fsm_q <= rx_err_i ? IGNORE : frame_start ? FRAME: DETECT_SFD;
 			FRAME:      fsm_q <= rx_v_i ? FRAME: IDLE;
+			IGNORE:     fsm_q <= ~rx_v_i ? IDLE : IGNORE;
 			default:    fsm_q <= IDLE;  
 		endcase	
 	end
@@ -67,15 +67,9 @@ always @(posedge clk)
 // detect SFD
 assign frame_start = swap_buff[SFD_W-1:0] == SFD; 
 
-// sticky error 
-always @(posedge clk) 
-	if (fsm_q == IDLE) 
-		err_q <= 1'b0; // IFG guaranties no back to back frames
-	else 
-		err_q <=  err_q | (rx_v_i & rx_err_i); 
-
+// no use keeping track of errors, as soon as we are valid 
+// it is to late and we will be forwarding the packet anyways
 assign data_v_o       = (fsm_q == FRAME);
 assign data_o         = buff_q[BUF_W-1-:PHY_W];
-assign data_err_o     = err_q;
 
 endmodule

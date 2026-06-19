@@ -9,8 +9,7 @@ granted to use it to train any model.
 
 module tt_um_coffeepot #(
 	localparam PORT_CNT = 3,
-	localparam PHY_W = 2,
-	localparam MAC_W = 48
+	localparam PHY_W = 2
 )(
 	input  wire [7:0] ui_in,    
     output wire [7:0] uo_out,   
@@ -45,7 +44,6 @@ wire             phy_rx_err[PORT_CNT-1:0];
 wire [PHY_W-1:0] phy_rx[PORT_CNT-1:0];
 
 wire             mac_rx_v[PORT_CNT-1:0];
-wire             mac_rx_err[PORT_CNT-1:0];
 wire [PHY_W-1:0] mac_rx[PORT_CNT-1:0];
 // RX0
 assign phy_rx[0][0]  = ui_in[0];
@@ -108,7 +106,6 @@ generate
 			.rx_i(rmii_rx[i]),
 			.rx_err_i(rmii_rx_err[i]),
 			.data_v_o(mac_rx_v[i]),
-			.data_err_o(mac_rx_err[i]),
 			.data_o(mac_rx[i])
 		);
 
@@ -118,7 +115,6 @@ generate
 			.data_v_i(),
 			.data_last_i(),
 			.data_i(),
-			.data_acc_o(),
 			.tx_v_o(mac_tx_v[i]),
 			.tx_o(mac_tx[i])
 		);
