@@ -85,8 +85,31 @@ async def simple_broadcast_test(dut):
 	random.seed(0)
 	await rst(dut) 
 	for _ in range(0, 10):
-		port_idx = random.randrange(0,3)
+		port_idx = random.randrange(0,phy_utils.PORT_CNT)
 		await send_frame(dut, port_idx, mac_utils.simple_frame())
+		# respect IPG	
+		await ClockCycles(dut.clk, 2*8*4 + 1) 
+	await ClockCycles(dut.clk, 10)
+
+@cocotb.test()
+async def checking_broadcast_test(dut):
+	random.seed(0)
+	rx_frames = {}
+	tx_frames = {}
+	await rst(dut) 
+	for _ in range(0, 10):
+		port_idx = random.randrange(0,phy_utils.PORT_CNT)
+		for i in range(0, phy_utils.PORT_CNT):
+			if i == port_idx:
+				rx_frames[i] = mac_utils.simple_frame()
+			else:
+				rx_frames[i] = None
+		for i in range(0, phy_utils.PORT_CNT):
+			if i == port_idx: 
+				tx_frames[i] = None
+			else: 
+				tx_frames[i] = rx_frames[port_idx]	
+		await send_and_check_frames(dut, rx_frames, tx_frames)
 		# respect IPG	
 		await ClockCycles(dut.clk, 2*8*4 + 1) 
 	await ClockCycles(dut.clk, 10)
