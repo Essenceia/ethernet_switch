@@ -47,7 +47,7 @@ always @(posedge clk) begin
 		case(fsm_q)
 			IDLE:       fsm_q <= rx_v_i ? DETECT_SFD : IDLE;
 			DETECT_SFD: fsm_q <= frame_start ? FRAME: DETECT_SFD;
-			FRAME:       fsm_q <= rx_v_i ? FRAME: IDLE;
+			FRAME:      fsm_q <= rx_v_i ? FRAME: IDLE;
 			default:    fsm_q <= IDLE;  
 		endcase	
 	end

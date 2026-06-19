@@ -32,6 +32,10 @@ always @(posedge clk)
 	rst_n_q <= rst_n; 
 
 // rx to mac rx
+wire             rmii_rx_v[PORT_CNT-1:0];
+wire             rmii_rx_err[PORT_CNT-1:0];
+wire [PHY_W-1:0] rmii_rx[PORT_CNT-1:0];
+
 wire             phy_rx_v[PORT_CNT-1:0];
 wire             phy_rx_err[PORT_CNT-1:0];
 wire [PHY_W-1:0] phy_rx[PORT_CNT-1:0];
@@ -55,19 +59,65 @@ assign phy_rx[2][1]  = uio_in[1];
 assign phy_rx_v[2]   = uio_in[2];
 assign phy_rx_err[2] = uio_in[3];  
 
+// lookup to tx
+wire             mac_tx_v[PORT_CNT-1:0];
+wire [PHY_W-1:0] mac_tx[PORT_CNT-1:0];
+
+wire             phy_tx_v[PORT_CNT-1:0];
+wire [PHY_W-1:0] phy_tx[PORT_CNT-1:0];
+// TX0 
+assign uo_out[0] = phy_tx[0][0];
+assign uo_out[1] = phy_tx[0][1];
+assign uo_out[2] = phy_tx_v[0];
+// TX1 
+assign uo_out[5] = phy_tx[1][0];
+assign uo_out[6] = phy_tx[1][1];
+assign uo_out[7] = phy_tx_v[1];
+// TX2
+assign uio_out[5] = phy_tx[2][0];
+assign uio_out[6] = phy_tx[2][1];
+assign uio_out[7] = phy_tx_v[2];
+
 genvar i; 
 generate 
-	for(i = 0; i < PORT_CNT; i=i+1) begin: g_mac_rx
+	for(i = 0; i < PORT_CNT; i=i+1) begin: g_channel
+		rmii m_rmii(
+			.clk(clk),
+			.rst_n(rst_n_q),
+			.phy_tx_v_o(phy_tx_v[i]),
+			.phy_tx_o  (phy_tx[i]),
+			.phy_rx_v_i  (phy_rx_v[i]),
+			.phy_rx_i    (phy_rx[i]),
+			.phy_rx_err_i(phy_rx_err[i]),
+			.mac_rx_v_o  (rmii_rx_v[i]),
+			.mac_rx_o    (rmii_rx[i]),
+			.mac_rx_err_o(rmii_rx_err[i]),
+			.mac_tx_v_i(mac_tx_v[i]),
+			.mac_tx_i  (mac_tx[i])
+		);
+
 		mac_rx m_mac_rx(
 			.clk(clk),
 			.rst_n(rst_n_q),
-			.rx_v_i(phy_rx_v[i]),
-			.rx_i(phy_rx[i]),
-			.rx_err_i(phy_rx_err[i]),
+			.rx_v_i(rmii_rx_v[i]),
+			.rx_i(rmii_rx[i]),
+			.rx_err_i(rmii_rx_err[i]),
 			.data_v_o(mac_rx_v[i]),
 			.data_err_o(mac_rx_err[i]),
 			.data_o(mac_rx[i])
 		);
+
+		mac_tx m_mac_tx(
+			.clk(clk),
+			.rst_n(rst_n_q),
+			.data_v_i(),
+			.data_last_i(),
+			.data_i(),
+			.data_acc_o(),
+			.tx_v_o(mac_tx_v[i]),
+			.tx_o(mac_tx[i])
+		);
+
 	end
 endgenerate
 
