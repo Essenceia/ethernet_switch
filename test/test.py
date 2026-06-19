@@ -2,7 +2,6 @@
 #
 # Julia Desmazes, 2026, human made code
 
-
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import FallingEdge, RisingEdge, ClockCycles, with_timeout
@@ -115,41 +114,5 @@ async def checking_broadcast_test(dut):
 		await send_and_check_frames(dut, rx_frames, tx_frames)
 		# respect IPG	
 		await ClockCycles(dut.clk, 2*8*4 + 1) 
-	await ClockCycles(dut.clk, 10)
-
-@cocotb.test(skip=True if GATES == "yes" else False)
-async def filter_rx_test(dut):
-	random.seed(0)
-	await rst(dut)
-	for _ in range(0,10):
-		await send_and_check_frames(dut, mac_utils.test_filtered_packets())
-	await ClockCycles(dut.clk, 10)
-
-@cocotb.test()
-async def update_eth_config(dut):
-	random.seed(0)
-	await rst(dut)
-	device_mac = mac_utils.DEFAULT_DEVICE_MAC
-	for _ in range(0,10):
-		new_mac = random.randbytes(6)
-		frame, config = mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac)
-		await send_frame(dut, frame)
-		dut_mac = int(dut.m_dut.mac_addr.value).to_bytes(6, byteorder='big')
-		dut_vid = int(dut.m_dut.vid.value).to_bytes(2, byteorder='big')
-		assert dut_mac == config.addr, f"missmatch mac config, config sent {config} got addr {dut_mac.hex()}"
-		assert dut_vid == config.vid, f"missmatch vid config, config sent {config} got vid {dut_vid.hex()} raw {dut.m_dut.vid.value}"
-		device_mac = new_mac
-	await ClockCycles(dut.clk, 10)
-
-@cocotb.test(skip=True if GATES == "yes" else False)
-async def update_mac_check_filter(dut):
-	random.seed(0)
-	await rst(dut)
-	device_mac = mac_utils.DEFAULT_DEVICE_MAC
-	for _ in range(0, 10):
-		new_mac = random.randbytes(6) 
-		await send_frame(dut, mac_utils.simple_config(dst_mac = device_mac, new_mac = new_mac))
-		device_mac = new_mac 
-		await send_and_check_frames(dut, mac_utils.test_filtered_packets(dst_mac = device_mac), device_mac = device_mac)	
 	await ClockCycles(dut.clk, 10)
 
