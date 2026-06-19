@@ -26,7 +26,7 @@ def set_rx(dut, idx: LogicArray, v: LogicArray, data: LogicArray, err:LogicArray
 			dut.phy_rx2_err.value = err
 
 # return valid:LogicArray , data: LogicArray
-def get_tx(dut, idx: LogicArray) -> Tuple[LogicArray, LogicArray]:
+def get_tx(dut, idx: LogicArray) -> tuple[LogicArray, LogicArray]:
 	assert idx >= 0 and idx <= PORT_CNT
 	valid = 0
 	data = 0
