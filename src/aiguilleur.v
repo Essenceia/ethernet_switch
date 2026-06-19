@@ -8,6 +8,7 @@ granted to use it to train any model.
 `default_nettype none
 
 module aiguilleur #(
+	parameter PHY_W = 2,
 	localparam PORT_CNT = 3
 )(
 	input wire clk, 

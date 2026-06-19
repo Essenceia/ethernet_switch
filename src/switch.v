@@ -36,7 +36,7 @@ genvar i;
 generate 
 	for(i = 0; i < PORT_CNT; i=i+1) begin: g_port_buff
 		always @(posedge clk) begin
-			buff_q[i]   <= {buff_q[i][BUF_W-PHY_W-1:0], mac_rx_i[i]};
+			buff_q[i]   <= {buff_q[i][BUF_W-PHY_W-1:0], mac_rx_i[(i+1)*PHY_W-1-:PHY_W]};
 			buff_v_q[i] <= {buff_v_q[i][BUF_V_W-2:0], mac_rx_v_i[i]};
 		end
 	end
@@ -56,37 +56,36 @@ wire [PORT_CNT-1:0]       mac_tx_v_next;
 reg  [PORT_CNT-1:0]       mac_tx_v_q;
 wire [PORT_CNT*PHY_W-1:0] mac_tx_next;
 reg  [PORT_CNT*PHY_W-1:0] mac_tx_q;
-wire [PORT_CNT-1:0]       mac_tx_last;
 
 // needs to be hand coded
 aiguilleur m_aiguille_tx0(
 	.clk(clk), 
 	.rst_n(rst_n), 
 	.new_dispatch_i(new_disp[0]),
-	.dir_o(disp_dir[PORT_CNT-2:0]),
+	.dir_i(disp_dir[PORT_CNT-2:0]),
 	.mac_rx_v_i({buff_v_q[2][BUF_V_W-1], buff_v_q[1][BUF_V_W-1]}),
 	.mac_rx_i  ({buff_q[2][BUF_W-1-:PHY_W], buff_q[1][BUF_W-1-:PHY_W]}),
-	.mac_tx_v_o(mac_tx_next[0]),
+	.mac_tx_v_o(mac_tx_v_next[0]),
 	.mac_tx_o(mac_tx_next[PHY_W-1:0])
 );
 aiguilleur m_aiguille_tx1(
 	.clk(clk), 
 	.rst_n(rst_n), 
 	.new_dispatch_i(new_disp[1]),
-	.dir_o(disp_dir[2*(PORT_CNT-1)-1-:PORT_CNT-1]),
+	.dir_i(disp_dir[2*(PORT_CNT-1)-1-:PORT_CNT-1]),
 	.mac_rx_v_i({buff_v_q[2][BUF_V_W-1], buff_v_q[0][BUF_V_W-1]}),
 	.mac_rx_i  ({buff_q[2][BUF_W-1-:PHY_W], buff_q[0][BUF_W-1-:PHY_W]}),
-	.mac_tx_v_o(mac_tx_next[1]),
+	.mac_tx_v_o(mac_tx_v_next[1]),
 	.mac_tx_o(mac_tx_next[2*PHY_W-1-:PHY_W])
 );
 aiguilleur m_aiguille_tx2(
 	.clk(clk), 
 	.rst_n(rst_n), 
 	.new_dispatch_i(new_disp[2]),
-	.dir_o(disp_dir[3*(PORT_CNT-1)-1-:PORT_CNT-1]),
+	.dir_i(disp_dir[3*(PORT_CNT-1)-1-:PORT_CNT-1]),
 	.mac_rx_v_i({buff_v_q[1][BUF_V_W-1], buff_v_q[0][BUF_V_W-1]}),
 	.mac_rx_i  ({buff_q[1][BUF_W-1-:PHY_W], buff_q[0][BUF_W-1-:PHY_W]}),
-	.mac_tx_v_o(mac_tx_next[2]),
+	.mac_tx_v_o(mac_tx_v_next[2]),
 	.mac_tx_o(mac_tx_next[3*PHY_W-1-:PHY_W])
 );
 
