@@ -1,18 +1,21 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Fri Jun 19 15:43:37 2026
+[*] Sat Jun 20 21:49:28 2026
 [*]
 [dumpfile] "/home/pitchu/asic/coffeepot/test/tb.vcd"
-[dumpfile_mtime] "Fri Jun 19 15:42:29 2026"
-[dumpfile_size] 14735
+[dumpfile_mtime] "Sat Jun 20 21:48:47 2026"
+[dumpfile_size] 57689
 [savefile] "/home/pitchu/asic/coffeepot/test/tb.gtkw"
-[timestart] 0
+[timestart] 5475100
 [size] 1910 470
 [pos] -1 -1
-*-23.384033 15160000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-14.948795 5580000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [treeopen] tb.m_dut.
 [treeopen] tb.m_dut.m_switch.
+[treeopen] tb.m_dut.m_switch.g_port_mac[1].
+[treeopen] tb.m_dut.m_switch.m_lookup.
+[treeopen] tb.m_dut.m_switch.m_lookup.m_dispatcher.
 [sst_width] 290
 [signals_width] 270
 [sst_expanded] 1
@@ -41,23 +44,22 @@ tb.phy_tx1_v
 [color] 2
 tb.phy_tx2_v
 @200
--switch
-@800028
-tb.m_dut.m_switch.mac_rx_start_i[2:0]
+-wr arb
 @28
-(0)tb.m_dut.m_switch.mac_rx_start_i[2:0]
-@29
-(1)tb.m_dut.m_switch.mac_rx_start_i[2:0]
-@28
-(2)tb.m_dut.m_switch.mac_rx_start_i[2:0]
-@1001200
--group_end
-@28
-tb.m_dut.m_switch.mac_tx_acc_i[2:0]
+tb.m_dut.m_switch.m_wr_arbitor.req_early_v_o
+@23
+tb.m_dut.m_switch.m_wr_arbitor.req_mac_o[47:0]
 @200
--aig
+-table wr
 @28
-tb.m_dut.m_switch.m_aiguille_tx0.mac_rx_v_i[1:0]
-tb.m_dut.m_switch.m_aiguille_tx0.sel_onehot_q[1:0]
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.fsm_q[1:0]
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_lookup_mac_sel_q
+@22
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.rd_mac[47:0]
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.mac_hit[3:0]
+@28
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_mac_group
+@22
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_sel_q[3:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -124,7 +124,9 @@ async def simple_unicast_test(dut):
 	await rst(dut) 
 	for _ in range(0, 10):
 		port_idx = random.randrange(0,phy_utils.PORT_CNT)
-		await send_frame(dut, port_idx, mac_utils.simple_frame(src_mac = table_utils.random_unicast_mac()))
+		src_mac =table_utils.random_unicast_mac() 
+		cocotb.log.info(f"unicast mac {src_mac.hex()}")
+		await send_frame(dut, port_idx, mac_utils.simple_frame(src_mac = src_mac ))
 		# respect IPG	
 		await ClockCycles(dut.clk, 2*8*4 + 1) 
 	await ClockCycles(dut.clk, 10)

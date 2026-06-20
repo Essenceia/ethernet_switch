@@ -63,8 +63,12 @@ generate
 		
 		wire [MAC_W-1:0] debug_header_mac;
 		wire             debug_dst_mac_v_next;
-		assign debug_header_mac = header_mac[i];
+		wire             debug_src_mac_v_next;
+		pairreverse_and_byteswap #(.W(MAC_W/8)) m_debug_mac_swap(
+			.i(header_mac[i]),.o(debug_header_mac)
+		);
 		assign debug_dst_mac_v_next = dst_mac_v_next[i];
+		assign debug_src_mac_v_next = src_mac_v_next[i];
 	end
 endgenerate
 

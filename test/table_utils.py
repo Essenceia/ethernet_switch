@@ -15,5 +15,5 @@ def random_broadcast_mac() -> bytes(6):
 def random_unicast_mac() -> bytes(6):
 	mac = bytearray()
 	mac += random.randbytes(6)
-	mac[0] = mac[0] ^ 0x01
+	mac[0] = mac[0] & 0xFE
 	return mac	

@@ -73,6 +73,7 @@ reg [MAC_W-1:0]      mem_mac_q[N-1:0];
 reg [PORT_IDX_W-1:0] mem_port_q[N-1:0];
 reg [TTNN_W-1:0]     mem_ttnn_q[N-1:0];
 
+wire [N-1:0] mac_hit_lite; 
 wire [N-1:0] mac_hit; 
 wire [N-1:0] alive_v; 
 reg  [N-1:0] wr_sel_q;
@@ -115,6 +116,14 @@ generate
 				mem_port_q[i] <= wr_port_idx;
 			end
 		end
+		// debug
+		wire [MAC_W-1:0]      debug_mem_mac; 
+		wire [PORT_IDX_W-1:0] debug_mem_port;
+		wire [TTNN_W-1:0]     debug_mem_ttnn;
+		assign debug_mem_mac  = mem_mac_q[i];
+		assign debug_mem_port = mem_port_q[i];
+		assign debug_mem_ttnn = mem_ttnn_q[i];
+
 	end // for
 endgenerate
 
@@ -127,8 +136,9 @@ assign rd_mac = wr_lookup_mac_sel_q ? wr_mac_i: rd_mac_i;
 // read - parallel lookup
 generate
 	for(i=0; i < N; i=i+1)begin: g_parallel_lookup
-		assign mac_hit[i] = mem_mac_q[i] == rd_mac; 
-		assign alive_v[i] = |mem_ttnn_q[i]; 
+		assign mac_hit_lite[i] = mem_mac_q[i] == rd_mac; 
+		assign alive_v[i] = |mem_ttnn_q[i];
+		assign mac_hit[i] = mac_hit_lite[i] & alive_v[i]; 
 	end
 endgenerate 
 
@@ -136,7 +146,7 @@ reg [PORT_IDX_W-1:0] port_hit;
 always @(*) begin
 	/* verilator lint_off CASEOVERLAP */
 	(* parallel_case *)
-	casez(mac_hit)
+	casez(mac_hit_lite)
 		4'b???1: port_hit = mem_port_q[0];
 		4'b??1?: port_hit = mem_port_q[1];
 		4'b?1??: port_hit = mem_port_q[2];
@@ -156,7 +166,7 @@ always @(*) begin
 	endcase
 end
 
-assign hit_v_o = |(mac_hit & alive_v);
+assign hit_v_o = |mac_hit;
 assign hit_port_o = port_hit_full; 
 
 endmodule 
