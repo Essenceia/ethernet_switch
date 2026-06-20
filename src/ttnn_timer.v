@@ -34,8 +34,8 @@ wire [INNER_CNT_W-1:0]  inner0_next, inner1_next;
 wire inner0_overflow,   inner1_overflow;  
 reg  inner0_overflow_q, inner1_overflow_q;  
 
-assign {inner0_overflow, inner0_next} <= inner0_q + {{INNER_CNT_W-1{1'b0}}, 1'b1};
-assign {inner1_overflow, inner1_next} <= inner1_q + {{INNER_CNT_W-1{1'b0}}, inner0_overflow_q};
+assign {inner0_overflow, inner0_next} = inner0_q + {{INNER_CNT_W-1{1'b0}}, 1'b1};
+assign {inner1_overflow, inner1_next} = inner1_q + {{INNER_CNT_W-1{1'b0}}, inner0_overflow_q};
 
 always @(posedge clk) begin
 	if (~rst_n) begin
@@ -66,7 +66,7 @@ reg update_pending_q;
 
 always @(posedge clk)
 	if (~rst_n | update_finished_i) update_pending_q <= 1'b0; 
-	else (trigger) update_pending_q <= 1'b0;
+	else if (trigger) update_pending_q <= 1'b1;
 
 assign updata_req_o = update_pending_q;
 
