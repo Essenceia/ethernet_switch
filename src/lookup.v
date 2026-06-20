@@ -49,7 +49,7 @@ dispatcher_unicast m_dispatcher_unicast(
 );
 assign unicast_match = 1'b0;
 
-assign new_dispatch_o = phy_tx_free_i & (unicast_match ? unicast_disp_lite : broadcast_disp_lite);
-assign dir_o = unicast_match ? unicast_dir : broadcast_dir; 
+assign new_dispatch_o = phy_tx_free_i & unicast_disp_lite;
+assign dir_o = unicast_dir; 
 
 endmodule	

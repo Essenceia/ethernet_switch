@@ -60,6 +60,6 @@ assign hit_mask = { {SEL_W{hit_port[2] | ~hit}},
 assign dir_hit_masked = dir_lite & hit_mask; 
 
 // output 
-assign new_dispatch_lite_o = ({PORT_CNT{~hit}} | hit_port) & ~req_port_i; 
+assign new_dispatch_lite_o = ({PORT_CNT{~hit}} | hit_port) & ~req_port_i & {PORT_CNT{req_v_i}}; 
 assign dir_o = dir_hit_masked; 
 endmodule

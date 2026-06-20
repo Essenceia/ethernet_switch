@@ -21,7 +21,7 @@ else:
 
 CLK_UNIT="ns"
 CLK_PERIOD=20
-
+RST_CYCLES=200
 
 def start_clk(dut):
 	clock = Clock(dut.clk, CLK_PERIOD, CLK_UNIT)
@@ -38,7 +38,7 @@ async def rst(dut, ena=1 ):
 	# set default phy rx
 	phy_utils.set_all_rx(dut, 0, "X"*2, "X")
 	dut.ena.value = 0
-	await ClockCycles(dut.clk, 10)
+	await ClockCycles(dut.clk, RST_CYCLES)
 	dut.rst_n.value = 1
 	dut.ena.value = ena
 	await ClockCycles(dut.clk, 20)
