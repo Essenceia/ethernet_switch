@@ -15,19 +15,21 @@ module ttnn_timer (
 	input wire clk, 
 	input wire rst_n, 
 	
-	input wire update_finished_i, 
-	output wire updata_req_o
+	input wire  update_finished_i, 
+	output wire update_req_o
 );
 // 2 intermediary times of 13 bits each
-`ifdef COCOTB
-localparam INNER_CNT_W = 3; 
+`ifdef COCOTB // increase tb stress
+localparam INNER_CNT_W = 5; 
 `else
 localparam INNER_CNT_W = 13; 
 `endif
 
-localparam CNT_MAX_VAL = 224;
-localparam CNT_W = $clog2(MAIN_CNT_MAX_VAL);
+localparam CNT_MAX_VAL = 224/16;
+localparam CNT_W = $clog2(CNT_MAX_VAL);
+/* verilator lint_off WIDTHTRUNC */
 localparam [CNT_W-1:0] CNT_MAX = CNT_MAX_VAL; 
+/* verilator lint_on WIDTHTRUNC */
 
 reg  [INNER_CNT_W-1:0]  inner0_q, inner1_q; 
 wire [INNER_CNT_W-1:0]  inner0_next, inner1_next; 
@@ -53,7 +55,6 @@ end
 
 // main counter
 reg  [CNT_W-1:0] cnt_q; 
-wire [CNT_W-1:0] cnt_next;
 wire             trigger;
 
 assign trigger = cnt_q == CNT_MAX;
@@ -68,7 +69,7 @@ always @(posedge clk)
 	if (~rst_n | update_finished_i) update_pending_q <= 1'b0; 
 	else if (trigger) update_pending_q <= 1'b1;
 
-assign updata_req_o = update_pending_q;
+assign update_req_o = update_pending_q;
 
 endmodule
 

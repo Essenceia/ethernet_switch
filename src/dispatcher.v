@@ -35,7 +35,7 @@ mac_addr_table #(
 	.rd_v_i(req_v_i),
 	.rd_mac_i(req_mac_i),
 	
-	.wr_v_i(1'bx),
+	.wr_v_next_i(1'b0),
 	.wr_mac_i({MAC_W{1'bx}}),
 	.wr_port_i({PORT_CNT{1'bx}}),
 	
