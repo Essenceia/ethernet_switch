@@ -24,7 +24,9 @@ module switch #(
 
 	input  wire [PORT_CNT-1:0]       mac_tx_acc_i
 );
-localparam DATA_DELAY = 8 * 8 + PHY_W; // preamble + sfd
+localparam PREAMBLE_BYTES = 8; // preamble + sfd
+localparam MAC_ADDR_BYTES = 6; 
+localparam DATA_DELAY = 8 * (PREAMBLE_BYTES + MAC_ADDR_BYTES) + PHY_W;
 localparam BUF_W = DATA_DELAY;
 localparam BUF_V_W = DATA_DELAY / PHY_W; 
 
@@ -46,6 +48,25 @@ generate
 	end
 endgenerate
 
+// accumulated mac
+localparam MAC_W = MAC_ADDR_BYTES * 8;
+localparam MAC_V_CYCLES = MAC_W / PHY_W;
+wire [MAC_W-1:0] dst_mac[PORT_CNT-1:0];
+wire             dst_mac_v_next[PORT_CNT-1:0];
+
+generate
+	for(i = 0; i < PORT_CNT; i=i+1) begin: g_port_mac
+		assign dst_mac[i] = buff_q[i][MAC_W-1:0];
+		assign dst_mac_v_next[i] = ~buff_v_q[i][MAC_V_CYCLES] & buff_v_q[i][MAC_V_CYCLES-1];
+		
+		wire [MAC_W-1:0] debug_dst_mac;
+		wire             debug_dst_mac_v_next;
+		assign debug_dst_mac = dst_mac[i];
+		assign debug_dst_mac_v_next = dst_mac_v_next[i];
+	end
+endgenerate
+
+// dispatch 
 wire [PORT_CNT-1:0]              new_disp; 
 wire [PORT_CNT*(PORT_CNT-1)-1:0] disp_dir; 
 

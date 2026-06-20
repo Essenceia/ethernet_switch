@@ -1,0 +1,44 @@
+/*
+Copyright (c) 2026 Julia Desmazes 
+
+This code was written by a human, authorization is explicitly not 
+granted to use it to train any model. 
+*/
+
+`default_nettype none
+
+module lookup #(
+	parameter PORT_CNT = 3, 
+	localparam DISP_SEL_W = PORT_CNT*(PORT_CNT-1),
+	parameter MAC_W = 48
+)(
+	input wire                req_v_i, 
+	input wire [PORT_CNT-1:0] req_port_i, 
+	input wire [MAC_W-1:0]    req_mac_i,
+	
+	input wire [PORT_CNT-1:0] phy_tx_free_i,
+
+	output wire [PORT_CNT-1:0]   new_dispatch_o,
+	output wire [DISP_SEL_W-1:0] dir_o	
+);
+wire [PORT_CNT-1:0] broadcast_disp_lite; 
+wire [PORT_CNT-1:0] unicast_disp_list; 
+wire unicast_match;
+
+wire [DISP_SEL_W-1:0] broadcast_dir; 
+wire [DISP_SEL_W-1:0] unicast_dir;
+ 
+// broadcast
+dispatcher_broadcast m_dispatcher(
+	.new_req_i(req_v_i), 
+	.new_dispatch_list_o(broadcast_disp_lite),
+	.dir_o(broadcast_dir)
+);
+// unicast -> mac lookup, fallback to broadcast in case of no match
+assign unicast_match = 1'b0;
+assign unicast_dir = {DISP_SEL_W{1'bx}};
+
+assign new_dispatch_o = phy_tx_free_i & (unicast_match ? unicast_disp_list : broadcast_disp_lite);
+assign dir_o = unicast_match ? unicast_dir : broadcast_dir; 
+
+endmodule	

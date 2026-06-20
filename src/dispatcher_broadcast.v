@@ -12,9 +12,8 @@ module dispatcher_broadcast #(
 	localparam DISP_SEL_W = PORT_CNT*(PORT_CNT-1)
 )(
 	input wire [PORT_CNT-1:0] new_req_i, 
-	input wire [PORT_CNT-1:0] free_i,
 
-	output wire [PORT_CNT-1:0] new_dispatch_o,
+	output wire [PORT_CNT-1:0] new_dispatch_lite_o,
 	output wire [DISP_SEL_W-1:0] dir_o	
 );
 // select high priority req
@@ -55,7 +54,7 @@ always @(*) begin
 	endcase
 end
 
-assign new_dispatch_o = free_i & new_disp_lite;
+assign new_dispatch_lite_o = new_disp_lite;
 assign dir_o = dir; 
 
 endmodule	
