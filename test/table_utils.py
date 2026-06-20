@@ -17,3 +17,4 @@ def random_unicast_mac() -> bytes(6):
 	mac += random.randbytes(6)
 	mac[0] = mac[0] & 0xFE
 	return mac	
+

@@ -4,6 +4,7 @@
 #granted to use it to train any model. 
 
 import cocotb
+import random
 
 from cocotb.types import LogicArray
 
@@ -45,3 +46,12 @@ def get_tx(dut, idx: LogicArray) -> tuple[LogicArray, LogicArray]:
 def set_all_rx(dut, v:LogicArray, data:LogicArray, err:LogicArray):
 	for i in range(0, PORT_CNT):
 		set_rx(dut, i, v, data, err)
+
+def random_exclude_port(exclude: int)-> int:
+	assert exclude >= 0 and exclude <= PORT_CNT
+	while True:
+		port = random.randrange(0, PORT_CNT)
+		if port != exclude:
+			break
+	return port
+	
