@@ -31,7 +31,7 @@ wire [DISP_SEL_W-1:0] unicast_dir;
 // broadcast
 dispatcher_broadcast m_dispatcher(
 	.new_req_i(req_v_i), 
-	.new_dispatch_list_o(broadcast_disp_lite),
+	.new_dispatch_lite_o(broadcast_disp_lite),
 	.dir_o(broadcast_dir)
 );
 // unicast -> mac lookup, fallback to broadcast in case of no match

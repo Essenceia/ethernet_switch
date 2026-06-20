@@ -14,7 +14,7 @@ module arbitor #(
 	input wire clk, 
 	input wire rst_n, 
 
-	input wire [PORT_CNT-1:0] req_next_i, 
+	input wire [PORT_CNT-1:0] req_early_i, 
 	input wire [MAC_W*PORT_CNT-1:0] req_mac_i, 
 
 	output wire                req_v_o,	
@@ -25,9 +25,9 @@ module arbitor #(
 // priority selection
 wire [PORT_CNT-1:0] prio_req; 
 reg  [PORT_CNT-1:0] prio_req_q; 
-assign prio_req[0] = new_req_i[0];
-assign prio_req[1] = new_req_i[1] & ~new_req_i[0];
-assign prio_req[2] = new_req_i[2] & ~|new_req_i[1:0];
+assign prio_req[0] = req_early_i[0];
+assign prio_req[1] = req_early_i[1] & ~req_early_i[0];
+assign prio_req[2] = req_early_i[2] & ~|req_early_i[1:0];
 
 always @(posedge clk) 
 	prio_req_q <= prio_req;
