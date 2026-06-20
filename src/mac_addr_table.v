@@ -66,8 +66,9 @@ generate
 	end
 endgenerate 
 
-wire [PORT_IDX_W-1:0] port_hit; 
+reg [PORT_IDX_W-1:0] port_hit; 
 always @(*) begin
+	/* verilator lint_off CASEOVERLAP */
 	(* parallel_case *)
 	casez(mac_hit)
 		4'b???1: port_hit = mem_port_q[0];
@@ -76,6 +77,7 @@ always @(*) begin
 		4'b1???: port_hit = mem_port_q[3];
 		default: port_hit = {PORT_IDX_W{1'bX}};
 	endcase
+	/* verilator lint_on CASEOVERLAP */
 end
 
 reg [PORT_CNT-1:0] port_hit_full; 
