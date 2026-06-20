@@ -36,7 +36,12 @@ TTNN time to num num (ageing mechanism)
 */
 localparam PORT_IDX_W    = $clog2(PORT_CNT);
 localparam TTNN_W        = 4;
-localparam MAC_GROUP_IDX = 40;  
+localparam MAC_GROUP_IDX = 40; 
+ 
+// TODO : analog CAM
+reg [MAC_W-1:0]      mem_mac_q[N-1:0];
+reg [PORT_IDX_W-1:0] mem_port_q[N-1:0];
+reg [TTNN_W-1:0]     mem_ttnn_q[N-1:0];
 
 /* memory fsm : coordinate read/writes, trigger regular ttnn updates */
 localparam IDLE   = 2'd0; 
@@ -78,11 +83,7 @@ replacement_policy #(.TTNN_W(TTNN_W)) m_replacement_policy(
 always @(posedge clk)
 	victime_q <= victime_next;
  
-// in the absence of a CAM ( TODO: design an analog CAM ) 
-reg [MAC_W-1:0]      mem_mac_q[N-1:0];
-reg [PORT_IDX_W-1:0] mem_port_q[N-1:0];
-reg [TTNN_W-1:0]     mem_ttnn_q[N-1:0];
-
+// in the absence of a CAM  
 wire [N-1:0] mac_hit_lite; 
 wire [N-1:0] mac_hit; 
 wire [N-1:0] alive_v; 
