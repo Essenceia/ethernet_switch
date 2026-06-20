@@ -16,6 +16,7 @@ module lookup #(
 	input wire rst_n,
 
 	input wire                req_v_i, 
+	input wire                req_early_v_i,
 	input wire [PORT_CNT-1:0] req_port_i, 
 	input wire [MAC_W-1:0]    req_mac_i,
 	
@@ -32,6 +33,7 @@ dispatcher m_dispatcher(
 	.clk(clk), 
 	.rst_n(rst_n),
 	.req_v_i(req_v_i),
+	.req_early_v_i(req_early_v_i),
 	.req_port_i(req_port_i),
 	.req_mac_i(req_mac_i), 
 	.new_dispatch_lite_o(disp_lite),

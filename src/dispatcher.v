@@ -16,6 +16,7 @@ module dispatcher #(
 	input wire rst_n,
 
 	input wire                   req_v_i,
+	input wire                   req_early_v_i,
 	input wire [PORT_CNT-1:0]    req_port_i, 
 	input wire [MAC_W-1:0]       req_mac_i, 
 
@@ -33,9 +34,10 @@ mac_addr_table #(
 	.clk(clk),
 	.rst_n(rst_n), 
 	.rd_v_i(req_v_i),
+	.rd_early_v_i(req_early_v_i),
 	.rd_mac_i(req_mac_i),
 	
-	.wr_v_next_i(1'b0),
+	.wr_early_v_i(1'b0),
 	.wr_mac_i({MAC_W{1'bx}}),
 	.wr_port_i({PORT_CNT{1'bx}}),
 	

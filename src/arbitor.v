@@ -17,6 +17,7 @@ module arbitor #(
 	input wire [MAC_W*PORT_CNT-1:0] req_mac_i, 
 
 	output wire                req_v_o,	
+	output wire                req_early_v_o,	
 	output wire[PORT_CNT-1:0]  req_port_o, 
 	output wire[MAC_W-1:0]     req_mac_o
 );
@@ -52,8 +53,9 @@ pairreverse_and_byteswap #(.W(MAC_W/8)) m_mac_swap(
 	.o(req_mac_swap)
 );
 
-assign req_v_o = |prio_req_q;
-assign req_port_o = prio_req_q; 
-assign req_mac_o = req_mac_swap; 
+assign req_v_o       = |prio_req_q;
+assign req_early_v_o = |prio_req;
+assign req_port_o    = prio_req_q; 
+assign req_mac_o     = req_mac_swap; 
 
 endmodule

@@ -68,6 +68,7 @@ endgenerate
 
 // arbitor
 wire                lookup_req_v;
+wire                lookup_req_early_v;
 wire [PORT_CNT-1:0] lookup_req_port; 
 wire [MAC_W-1:0]    lookup_mac; 
 arbitor m_arbitor(
@@ -75,6 +76,7 @@ arbitor m_arbitor(
 	.req_early_i({dst_mac_v_next[2], dst_mac_v_next[1],dst_mac_v_next[0]}),
 	.req_mac_i({dst_mac[2], dst_mac[1], dst_mac[0]}),
 	.req_v_o(lookup_req_v), 
+	.req_early_v_o(lookup_req_early_v), 
 	.req_port_o(lookup_req_port),
 	.req_mac_o(lookup_mac)
 );
@@ -85,8 +87,8 @@ wire [PORT_CNT*(PORT_CNT-1)-1:0] disp_dir;
 lookup m_lookup(
 	.clk(clk), 
 	.rst_n(rst_n), 
-
 	.req_v_i(lookup_req_v),
+	.req_early_v_i(lookup_req_early_v),
 	.req_port_i(lookup_req_port),
 	.req_mac_i(lookup_mac), 
 	.phy_tx_free_i(mac_tx_acc_i),
