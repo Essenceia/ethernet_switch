@@ -7,7 +7,7 @@ granted to use it to train any model.
 
 `default_nettype none
 
-/* Guaranties no duplicate entries */
+/* Guaranties no duplicate or broadcast entries */
 module mac_addr_table #(
 	parameter N = 4, // number of entries
 	parameter MAC_W = 48,
@@ -68,6 +68,16 @@ ttnn_timer m_ttnn_timer(
 	.update_req_o(req_ttnn_update)
 );
 
+// replacement policy 
+wire [N-1:0] victime_next;
+reg  [N-1:0] victime_q;
+replacement_policy #(.TTNN_W(TTNN_W)) m_replacement_policy(
+	.ttnn_i({mem_ttnn_q[3], mem_ttnn_q[2], mem_ttnn_q[1], mem_ttnn_q[0]}),
+	.victime_o(victime_next)
+);
+always @(posedge clk)
+	victime_q <= victime_next;
+ 
 // in the absence of a CAM ( TODO: design an analog CAM ) 
 reg [MAC_W-1:0]      mem_mac_q[N-1:0];
 reg [PORT_IDX_W-1:0] mem_port_q[N-1:0];
@@ -76,15 +86,15 @@ reg [TTNN_W-1:0]     mem_ttnn_q[N-1:0];
 wire [N-1:0] mac_hit_lite; 
 wire [N-1:0] mac_hit; 
 wire [N-1:0] alive_v; 
-reg  [N-1:0] wr_sel_q;
+reg  [N-1:0] wr_sel;
 wire         wr_mac_group; 
 
 genvar i; 
 
 // TODO replacement policy and look for collisions 
 assign wr_mac_group = wr_mac_i[MAC_GROUP_IDX]; // don't write group addresses, should be broadcasted
-assign wr_sel_q = mac_hit // collison, overwrite entry 
-			   | ({N{~|mac_hit & ~wr_mac_group}} & 4'b0001);
+assign wr_sel = mac_hit // collison, overwrite entry 
+			   | ({N{~|mac_hit}} & victime_q);
 
 // compress port onehot to idx
 reg [PORT_IDX_W-1:0] wr_port_idx; 
@@ -101,17 +111,17 @@ always @(*) begin
 end
 
 // write
-assign wr_v = (fsm_q == WRITE) & ~rd_v_i; 
+assign wr_v = (fsm_q == WRITE) & ~rd_v_i & ~wr_mac_group; 
 generate
 	for(i=0; i < N; i=i+1)begin: g_mem
 		// TTNN
 		always @(posedge clk) 
 			if (~rst_n )                 mem_ttnn_q[i] <= {TTNN_W{1'b0}};
-			else if (wr_v & wr_sel_q[i]) mem_ttnn_q[i] <= {TTNN_W{1'b1}};
+			else if (wr_v & wr_sel[i]) mem_ttnn_q[i] <= {TTNN_W{1'b1}};
 			else if  (fsm_q == UPDATE)   mem_ttnn_q[i] <= mem_ttnn_q[i] - {{TTNN_W-1{1'b0}},alive_v[i]}; // can do sequential update for area		
 
 		always @(posedge clk) begin
-			if (wr_v & wr_sel_q[i]) begin
+			if (wr_v & wr_sel[i]) begin
 				mem_mac_q[i] <= wr_mac_i;
 				mem_port_q[i] <= wr_port_idx;
 			end
@@ -161,7 +171,7 @@ always @(*) begin
 	case(port_hit) 
 		2'd0: port_hit_full = 3'b001;
 		2'd1: port_hit_full = 3'b010;
-		2'd3: port_hit_full = 3'b100;
+		2'd2: port_hit_full = 3'b100;
 		default: port_hit_full = {PORT_CNT{1'bx}};
 	endcase
 end

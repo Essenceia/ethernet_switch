@@ -1,21 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.115 (w)1999-2023 BSI
-[*] Sat Jun 20 21:49:28 2026
+[*] Sat Jun 20 23:07:29 2026
 [*]
 [dumpfile] "/home/pitchu/asic/coffeepot/test/tb.vcd"
-[dumpfile_mtime] "Sat Jun 20 21:48:47 2026"
-[dumpfile_size] 57689
+[dumpfile_mtime] "Sat Jun 20 22:57:04 2026"
+[dumpfile_size] 14947
 [savefile] "/home/pitchu/asic/coffeepot/test/tb.gtkw"
-[timestart] 5475100
+[timestart] 0
 [size] 1910 470
 [pos] -1 -1
-*-14.948795 5580000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-24.948795 12100000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [treeopen] tb.m_dut.
 [treeopen] tb.m_dut.m_switch.
 [treeopen] tb.m_dut.m_switch.g_port_mac[1].
 [treeopen] tb.m_dut.m_switch.m_lookup.
 [treeopen] tb.m_dut.m_switch.m_lookup.m_dispatcher.
+[treeopen] tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.
 [sst_width] 290
 [signals_width] 270
 [sst_expanded] 1
@@ -47,7 +48,7 @@ tb.phy_tx2_v
 -wr arb
 @28
 tb.m_dut.m_switch.m_wr_arbitor.req_early_v_o
-@23
+@22
 tb.m_dut.m_switch.m_wr_arbitor.req_mac_o[47:0]
 @200
 -table wr
@@ -56,10 +57,26 @@ tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.fsm_q[1:0]
 tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_lookup_mac_sel_q
 @22
 tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.rd_mac[47:0]
+@23
 tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.mac_hit[3:0]
 @28
 tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_mac_group
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_v
 @22
-tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_sel_q[3:0]
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.wr_sel[3:0]
+@200
+-debug table
+@22
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.g_mem[0].debug_mem_mac[47:0]
+@28
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.g_mem[0].debug_mem_port[1:0]
+@22
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.g_mem[0].debug_mem_ttnn[3:0]
+@200
+-timer
+@28
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.m_ttnn_timer.update_req_o
+@22
+tb.m_dut.m_switch.m_lookup.m_dispatcher.m_table.m_ttnn_timer.cnt_q[3:0]
 [pattern_trace] 1
 [pattern_trace] 0

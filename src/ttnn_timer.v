@@ -20,7 +20,7 @@ module ttnn_timer (
 );
 // 2 intermediary times of 13 bits each
 `ifdef COCOTB // increase tb stress
-localparam INNER_CNT_W = 5; 
+localparam INNER_CNT_W = 2; 
 `else
 localparam INNER_CNT_W = 13; 
 `endif
