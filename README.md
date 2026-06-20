@@ -8,5 +8,11 @@ Thanks to the Tiny Tapeout project, its contributors, and all the community work
 
 ## License 
 
-This hardware is distributed under the **strongly** reciprocal CERN Open Hardware Licence Version 2.
+This hardware is distributed under the **strongly** reciprocal CERN Open Hardware Licence Version 2 unless
+otherwise specified.
 
+### Tiny Tapeout exception
+
+Any submission of this design, or derivatives thereof, made through the Tiny Tapeout 
+shuttle program is additionally licensed under the Apache License 2.0 and is exempt from the 
+reciprocal requirements of CERN-OHL-S-2.0 solely for that purpose.
