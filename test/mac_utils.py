@@ -99,6 +99,7 @@ async def write_rx_frame(dut, port_idx:int, raw):
 	for _ in range(0, ipg):
 		phy_utils.set_rx(dut, port_idx, v=0, data="X"*2, err="X")
 		await ClockCycles(dut.clk,1)
+	cocotb.log.info(f"write frame to RX{port_idx} finished")
 
 # convert from byte array where data is stored in the 2 lower bits 
 # to a real byte array 
