@@ -12,7 +12,6 @@ module arbitor #(
 	parameter MAC_W = 48
 )(
 	input wire clk, 
-	input wire rst_n, 
 
 	input wire [PORT_CNT-1:0] req_early_i, 
 	input wire [MAC_W*PORT_CNT-1:0] req_mac_i, 
@@ -33,16 +32,22 @@ always @(posedge clk)
 	prio_req_q <= prio_req;
 
 reg [MAC_W-1:0] req_mac;
+// specify this is a parallel case multiplexer and that 
+// the sel is a onehot0 
+/* verilator lint_off CASEOVERLAP */
 always @(*) begin
-	casex(prio_req_q)
-		3'bxx1: req_mac = req_mac_i[MAC_W-1:0];
-		3'bx1x: req_mac = req_mac_i[2*MAC_W-1-:MAC_W];
-		3'b1xx: req_mac = req_mac_i[3*MAC_W-1-:MAC_W];
+	(* parallel_case *)
+	casez(prio_req_q)
+		3'b??1: req_mac = req_mac_i[MAC_W-1:0];
+		3'b?1?: req_mac = req_mac_i[2*MAC_W-1-:MAC_W];
+		3'b1??: req_mac = req_mac_i[3*MAC_W-1-:MAC_W];
 		default: req_mac = {MAC_W{1'bx}};
 	endcase
 end
+/* verilator lint_on CASEOVERLAP */
 
 assign req_v_o = |prio_req_q;
 assign req_port_o = prio_req_q; 
+assign req_mac_o = req_mac; 
 
 endmodule

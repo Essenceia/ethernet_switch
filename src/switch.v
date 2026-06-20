@@ -72,7 +72,6 @@ wire [PORT_CNT-1:0] lookup_req_port;
 wire [MAC_W-1:0]    lookup_mac; 
 arbitor m_arbitor(
 	.clk(clk),
-	.rst_n(rst_n),
 	.req_early_i({dst_mac_v_next[2], dst_mac_v_next[1],dst_mac_v_next[0]}),
 	.req_mac_i({dst_mac[2], dst_mac[1], dst_mac[0]}),
 	.req_v_o(lookup_req_v), 

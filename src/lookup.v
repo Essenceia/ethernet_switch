@@ -22,7 +22,7 @@ module lookup #(
 	output wire [DISP_SEL_W-1:0] dir_o	
 );
 wire [PORT_CNT-1:0] broadcast_disp_lite; 
-wire [PORT_CNT-1:0] unicast_disp_list; 
+wire [PORT_CNT-1:0] unicast_disp_lite; 
 wire unicast_match;
 
 wire [DISP_SEL_W-1:0] broadcast_dir; 
@@ -30,15 +30,16 @@ wire [DISP_SEL_W-1:0] unicast_dir;
  
 // broadcast
 dispatcher_broadcast m_dispatcher(
-	.new_req_i(req_v_i), 
+	.new_req_i(req_port_i), 
 	.new_dispatch_lite_o(broadcast_disp_lite),
 	.dir_o(broadcast_dir)
 );
 // unicast -> mac lookup, fallback to broadcast in case of no match
 assign unicast_match = 1'b0;
+assign unicast_disp_lite = {PORT_CNT{1'bx}};
 assign unicast_dir = {DISP_SEL_W{1'bx}};
 
-assign new_dispatch_o = phy_tx_free_i & (unicast_match ? unicast_disp_list : broadcast_disp_lite);
+assign new_dispatch_o = phy_tx_free_i & (unicast_match ? unicast_disp_lite : broadcast_disp_lite);
 assign dir_o = unicast_match ? unicast_dir : broadcast_dir; 
 
 endmodule	
