@@ -224,3 +224,16 @@ async def table_realloc_test(dut):
 		if GATES == "": 
 			assert dut.m_dut.m_switch.m_lookup.m_dispatcher.m_table.cocotb_nobody_is_dead.value == 0, f"Unexpacted multiple allocated table entries"
 			assert dut.m_dut.m_switch.m_lookup.m_dispatcher.m_table.cocotb_entry_alloc_cnt.value == 1, f"Expecting a single allocated table entry"
+
+@cocotb.test()
+async def table_stress_write(dut):
+	pass
+
+
+
+
+
+
+
+
+
