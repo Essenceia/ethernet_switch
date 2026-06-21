@@ -157,7 +157,7 @@ reg [PORT_IDX_W-1:0] port_hit;
 always @(*) begin
 	/* verilator lint_off CASEOVERLAP */
 	(* parallel_case *)
-	casez(mac_hit)
+	casez(mac_hit_lite)
 		4'b???1: port_hit = mem_port_q[0];
 		4'b??1?: port_hit = mem_port_q[1];
 		4'b?1??: port_hit = mem_port_q[2];
@@ -193,5 +193,9 @@ wire [N_IDX_W-1:0] cocotb_entry_alloc_cnt;
 
 assign cocotb_nobody_is_dead  = &alive_v;
 assign cocotb_entry_alloc_cnt = alive_v[3] + alive_v[2] + alive_v[1] + alive_v[0];
+`endif
+`ifdef FORMAL 
+sva_onehot_port_hit:    assert property(@posedge (clk) hit_v_o |-> $onehot(mac_hit_lite)); 
+sva_onehot_wr_port_hit: assert property(@posedge (clk) wr_early_v_o |=> $onehot(wr_port_i)); 
 `endif
 endmodule 
