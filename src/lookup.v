@@ -49,6 +49,9 @@ dispatcher m_dispatcher(
 	.dir_o(dir)
 );
 
+(* dont_touch *) wire [PORT_CNT-1:0] debug_new_dispatch; 
+assign debug_new_dispatch = new_dispatch_o;
+
 assign new_dispatch_o = phy_tx_free_i & disp_lite;
 assign dir_o = dir; 
 

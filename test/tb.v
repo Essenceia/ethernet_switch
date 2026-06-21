@@ -88,6 +88,7 @@ module tb ();
 	);
 
 
+`ifndef GL_TEST
 /* mac address table for increasing tech coverage */
 localparam MAC_W = 48;
 localparam PORT_CNT = 3;
@@ -126,5 +127,6 @@ mac_addr_table #(.N(N), .MAC_W(MAC_W), .PORT_CNT(PORT_CNT)) m_table(
 	.hit_v_o(hit),
 	.hit_port_o(hit_port)
 );
+`endif
 
 endmodule
