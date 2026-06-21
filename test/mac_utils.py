@@ -54,12 +54,10 @@ class eth_frame:
 	body: bytes = bytes(46)
 	fcs: bytes = b'\xff\xff\xff\xff'
 	
-	def random_body(self, ethtype : bytes(2) =b'\x88\xB5', l:int= 46):
-		body = bytearray(0)
-		for i in range(0,l):
-			body.append(random.randint(0,255))
+	def random_body_ethtype(self,l:int= 46):
+		body = random.randbytes(l)
+		ethtype = random.randbytes(2)
 		self.set_payload(body, ethtype)
-		
 
 	def set_payload(self, payload, ethtype=b'\x88\xB5'):
 		self.body = payload
@@ -138,7 +136,7 @@ async def read_tx_frame(dut, port_idx : int) -> bytes:
 			break
 		await ClockCycles(dut.clk, 1)
 
-	assert len(buff) == (64+8)*4, f"read frame TX{port_idx} got frame len {len(buff)}/{(64+8)*4}, frame {bitpair_to_bytes(buff).tobytes().hex()}"
+	assert len(buff) >= (64+8)*4, f"read frame TX{port_idx} got frame len {len(buff)} expecting at least {(64+8)*4}, frame {bitpair_to_bytes(buff).tobytes().hex()}"
 	cocotb.log.info(f"read frame TX{port_idx} finished")
 	return bitpair_to_bytes(buff)
 
@@ -149,32 +147,13 @@ async def check_no_tx_frame(dut, port_idx: int, timeout:int = 150) -> None:
 		await ClockCycles(dut.clk, 1)
 	cocotb.log.info(f"check no frame TX{port_idx} finished")
 		
-# { expect result boolean, result }
-def expected_response(req: eth_frame, device_mac : bytes(6) = DEFAULT_DEVICE_MAC) -> tuple[bool, eth_frame]:
-	tx_sent = False
-	if (req.header.dst == device_mac) and(req.header.ethtype == APP_ETHTYPE): 
-		tx_sent = True
-	if req.header.vlan_tag is not None: 	
-		if (req.header.vlan_tag.tci & VID_MASK) != DEFAULT_VID:
-			tx_sent = False
-	resp = eth_frame(dst=req.header.src, src=req.header.dst)
-	resp.set_payload(app_utils.layer3_app(req.body), APP_ETHTYPE)
-	return tx_sent, resp
-		
-def simple_frame(dst_mac: bytes(6) = b"\x11\x22\x33\x44\x55\x66", src_mac: bytes(6) = b"\x77\x88\x99\xAA\xBB\xCC" ) -> eth_frame:
-	# group dst address
+def simple_frame(dst_mac: bytes(6) = b"\x11\x22\x33\x44\x55\x66", src_mac: bytes(6) = b"\x77\x88\x99\xAA\xBB\xCC" , payload_l : int = -1) -> eth_frame:
+	if payload_l < 0:
+		if random.randint(0, 100) < 39: 
+			payload_l = random.randint(46, 60)
+		else:
+			payload_l = random.randint(46, 100)
 	frame = eth_frame(dst=dst_mac, src=src_mac)
-	frame.set_payload(payload = app_utils.random_request_payload() , ethtype = APP_ETHTYPE)
+	frame.random_body_ethtype(l = payload_l)
 	return frame
 
-def test_filtered_packets(dst_mac: bytes(6) = DEFAULT_DEVICE_MAC ) -> eth_frame:
-	accepted_pkt = simple_frame()
-	src_mac = random.randbytes(6)
-	ethtype = APP_ETHTYPE
-	if (random.randint(0,100) < 10):
-		dst_mac = random.randbytes(6)
-	if (random.randint(0,100) < 10):
-		ethtype = random.randbytes(2)
-	frame = eth_frame(dst = dst_mac, src = src_mac)
-	frame.set_payload(payload = app_utils.random_request_payload() , ethtype = APP_ETHTYPE)
-	return frame
