@@ -186,7 +186,7 @@ async def table_entry_expire_test(dut):
 	# send packet with source, table is empty, should be broadcasted
 	origin_port = random.randrange(0, phy_utils.PORT_CNT)
 	await check_broadcast(dut, src_port = origin_port, src_mac = src_mac, dst_mac = table_utils.random_broadcast_mac())
-	if GATES is "": #expire time change between gl and pure sim
+	if GATES == "": #expire time change between gl and pure sim
 		cocotb.log.info(f"wait for expire {table_utils.ENTRY_EXPIERY_TIMEOUT}")
 		await ClockCycles(dut.clk, table_utils.ENTRY_EXPIERY_TIMEOUT)
 		await check_broadcast(dut, src_port = phy_utils.random_exclude_port(origin_port), src_mac = table_utils.random_unicast_mac(), dst_mac = src_mac)
@@ -228,11 +228,24 @@ async def table_realloc_test(dut):
 			assert dut.m_dut.m_switch.m_lookup.m_dispatcher.m_table.cocotb_nobody_is_dead.value == 0, f"Unexpacted multiple allocated table entries"
 			assert dut.m_dut.m_switch.m_lookup.m_dispatcher.m_table.cocotb_entry_alloc_cnt.value == 1, f"Expecting a single allocated table entry"
 
+# sim only tests
 @cocotb.test()
-async def table_stress_write(dut):
-	pass
-
-
+async def table_stress_read(dut):
+	for _ in range(0, 10):
+		wr_credits = table_utils.ENTRY_NUM - 1
+		# write an entry
+		rd_port = random.randrange(0, phy_utils.PORT_CNT)
+		rd_mac = table_utils.random_unicast_mac()
+		await check_broadcast(dut, src_port = rd_port, src_mac = rd_mac, dst_mac = table_utils.random_unicast_mac())
+		for _ in range(0, 10):
+			# random write if credits available
+			if (random.randrange(0,100) > 20) and wr_credits > 0:
+				await check_broadcast(dut, src_port = table_utils.randrange(0, phy_utils.PORT_CNT), src_mac = table_utils.random_unicast_mac(), dst_mac = table_utils.random_unicast_mac())
+				wr_credits = wr_credits - 1	
+			# check entry read 
+			await check_unicast(dut, src_port = phy_utils.random_exclude_port(rd_port), dst_port = rd_port, dst_mac = rd_mac, src_mac = table_utils.random_unicast_mac())
+			
+		
 
 
 
