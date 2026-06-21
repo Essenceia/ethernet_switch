@@ -103,10 +103,10 @@ always @(*) begin
 	/* verilator lint_off CASEOVERLAP */
 	(* parallel_case *)
 	casez(wr_port_i)
-		3'b??1:  wr_port_idx = 2'd0;
-		3'b?1?:  wr_port_idx = 2'd1;
-		3'b1??:  wr_port_idx = 2'd2;
-		default: wr_port_idx = {PORT_IDX_W{1'bx}};
+		3'b??1: wr_port_idx = 2'd0;
+		3'b?1?: wr_port_idx = 2'd1;
+		3'b1??: wr_port_idx = 2'd2;
+		3'b000: wr_port_idx = {PORT_IDX_W{1'bx}};
 	endcase
 	/* verilator lint_on CASEOVERLAP */
 end
