@@ -308,7 +308,21 @@ async def no_rebroadcsat_on_incomming_test(dut):
 		await check_no_send(dut, src_port = origin_port, src_mac = table_utils.random_unicast_mac(), dst_mac = origin_mac) 		
 		await ClockCycles(dut.clk, 2*8*4 + 1) 
 
-
+@cocotb.test()
+async def close_rx_packets_test(dut):
+	set_random_seed()
+	await rst(dut)
+	for _ in range(0, TEST_ITER):
+		port_list = list(range(phy_utils.PORT_CNT))
+		random.shuffle(port_list)
+		rx_send_threads = []
+		for p in port_list: 
+			rx_frame = mac_utils.simple_frame(dst_mac = random.randbytes(6), src_mac = random.randbytes(6))
+			rx_send_threads.append(cocotb.start_soon(mac_utils.write_rx_frame(dut, port_idx = p, raw = rx_frame.raw())))
+			await ClockCycles(dut.clk, random.randrange(0, 10))
+		for thread in rx_send_threads:
+			await thread
+		
 
 
 
