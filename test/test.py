@@ -27,6 +27,7 @@ else:
 CLK_UNIT="ns"
 CLK_PERIOD=20
 RST_CYCLES=200
+CLK_TIMEOUT_PERIOD = 5000
 
 def start_clk(dut):
 	clock = Clock(dut.clk, CLK_PERIOD, CLK_UNIT)
@@ -76,8 +77,14 @@ async def send_and_check_frames(dut, rx: {int, mac_utils.eth_frame}, tx: {int, m
 	for i in range(0, phy_utils.PORT_CNT):
 		tx_thread = read_tx_thread[i]
 		if tx[i] is not None:
+			
+			try:
+				tx_frame = await with_timeout( tx_thread, CLK_TIMEOUT_PERIOD, CLK_UNIT) 
+			except TimeoutError:
+				cocotb.log.error(f"Timeout reading TX{i}")
+				assert(0)
+			
 			# compare gotten and expected
-			tx_frame = await tx_thread
 			tx_raw = tx[i].raw(is_rmii_tx = True)
 			expected = tx_raw.hex()
 			gotten = tx_frame.tobytes().hex()
@@ -106,6 +113,7 @@ async def simple_broadcast_test(dut):
 	await ClockCycles(dut.clk, 10)
 
 async def check_broadcast(dut, src_port:int, src_mac: bytes(6), dst_mac: bytes(6)):
+	cocotb.log.info(f"check broadcast, RX{src_port} (dst_mac:{dst_mac.hex()} src_mac:{src_mac.hex()})") 
 	rx_frames = {}
 	tx_frames = {}
 	for i in range(0, phy_utils.PORT_CNT):
@@ -136,6 +144,7 @@ async def checking_broadcast_test(dut):
 	await ClockCycles(dut.clk, 10)
 
 async def check_unicast(dut, src_port:int, dst_port:int, dst_mac: bytes(6), src_mac: bytes(6)):
+	cocotb.log.info(f"check unicast, RX{src_port}->TX{dst_port} (dst_mac:{dst_mac.hex()} src_mac:{src_mac.hex()})") 
 	rx_frames = {}
 	tx_frames = {}
 	for i in range(0, phy_utils.PORT_CNT):
@@ -170,7 +179,7 @@ async def simple_unicast_test(dut):
 		await check_unicast(dut, src_port = pkt_port, dst_port = target_port, dst_mac = target_mac, src_mac = ignored_mac)
 		# respect IPG	
 		await ClockCycles(dut.clk, 2*8*4 + 1)
-	if GATES is "": 
+	if GATES == "": 
 		await ClockCycles(dut.clk, table_utils.ENTRY_EXPIERY_TIMEOUT_SHORT)
 		
 		# check entry has expired
@@ -216,8 +225,8 @@ async def table_multialloc_test(dut):
 @cocotb.test()
 async def table_realloc_test(dut): 
 	set_random_seed()
-	src_mac = table_utils.random_unicast_mac() 
 	await rst(dut) 
+	src_mac = table_utils.random_unicast_mac() 
 	for i in range(0, 10): 
 		dst_mac = table_utils.random_broadcast_mac() 
 		origin_port = random.randrange(0, phy_utils.PORT_CNT)
@@ -231,6 +240,8 @@ async def table_realloc_test(dut):
 # sim only tests
 @cocotb.test()
 async def table_stress_read(dut):
+	set_random_seed()
+	await rst(dut) 
 	for _ in range(0, 10):
 		wr_credits = table_utils.ENTRY_NUM - 1
 		# write an entry
@@ -239,8 +250,8 @@ async def table_stress_read(dut):
 		await check_broadcast(dut, src_port = rd_port, src_mac = rd_mac, dst_mac = table_utils.random_unicast_mac())
 		for _ in range(0, 10):
 			# random write if credits available
-			if (random.randrange(0,100) > 20) and wr_credits > 0:
-				await check_broadcast(dut, src_port = table_utils.randrange(0, phy_utils.PORT_CNT), src_mac = table_utils.random_unicast_mac(), dst_mac = table_utils.random_unicast_mac())
+			if random.randrange(0,100) > 20 and wr_credits > 0:
+				await check_broadcast(dut, src_port = random.randrange(0, phy_utils.PORT_CNT), src_mac = table_utils.random_unicast_mac(), dst_mac = table_utils.random_unicast_mac())
 				wr_credits = wr_credits - 1	
 			# check entry read 
 			await check_unicast(dut, src_port = phy_utils.random_exclude_port(rd_port), dst_port = rd_port, dst_mac = rd_mac, src_mac = table_utils.random_unicast_mac())
