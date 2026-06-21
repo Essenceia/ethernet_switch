@@ -178,6 +178,7 @@ always @(*) begin
 end
 
 (* dont_touch , keep *)wire [N-1:0] debug_mac_hit;  
+(* dont_touch , keep *)wire         debug_mac_o;  
 (* dont_touch , keep *)wire [N-1:0] debug_entry_alive;  
 (* dont_touch , keep *)wire [PORT_CNT-1:0] debug_port_hit_full;
 (* dont_touch , keep *)wire [PORT_CNT-1:0] debug_rd_v;
