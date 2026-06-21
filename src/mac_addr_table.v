@@ -106,7 +106,7 @@ always @(*) begin
 		3'b??1: wr_port_idx = 2'd0;
 		3'b?1?: wr_port_idx = 2'd1;
 		3'b1??: wr_port_idx = 2'd2;
-		3'b000: wr_port_idx = {PORT_IDX_W{1'bx}};
+		default:wr_port_idx = {PORT_IDX_W{1'bx}};
 	endcase
 	/* verilator lint_on CASEOVERLAP */
 end
@@ -162,7 +162,7 @@ always @(*) begin
 		4'b??1?: port_hit = mem_port_q[1];
 		4'b?1??: port_hit = mem_port_q[2];
 		4'b1???: port_hit = mem_port_q[3];
-		4'b0000: port_hit = {PORT_IDX_W{1'bX}};
+		default: port_hit = {PORT_IDX_W{1'bX}};
 	endcase
 	/* verilator lint_on CASEOVERLAP */
 end
