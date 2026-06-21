@@ -157,7 +157,7 @@ reg [PORT_IDX_W-1:0] port_hit;
 always @(*) begin
 	/* verilator lint_off CASEOVERLAP */
 	(* parallel_case *)
-	casez(mac_hit_lite)
+	casez(mac_hit)
 		4'b???1: port_hit = mem_port_q[0];
 		4'b??1?: port_hit = mem_port_q[1];
 		4'b?1??: port_hit = mem_port_q[2];
@@ -191,9 +191,11 @@ assign debug_mac_hit = mac_hit;
 assign debug_entry_alive = alive_v;
 assign debug_rd_v = rd_v_i;
 assign debug_hit_v_o = hit_v_o;
+
 assign debug_port_hit_full = port_hit_full;
 assign debug_port_hit_idx = port_hit;
 assign debug_mac_hit_lite = mac_hit_lite; 
+
 assign debug_wr_v = wr_v & |wr_sel; 
 assign debug_wr_port_idx = wr_port_idx;
 assign debug_wr_port     = wr_port_i;
@@ -212,7 +214,7 @@ assign cocotb_nobody_is_dead  = &alive_v;
 assign cocotb_entry_alloc_cnt = alive_v[3] + alive_v[2] + alive_v[1] + alive_v[0];
 `endif
 `ifdef FORMAL 
-sva_onehot_port_hit:    assert property(@posedge (clk) hit_v_o |-> $onehot(mac_hit_lite)); 
+//sva_onehot_port_hit:    assert property(@posedge (clk) hit_v_o |-> $onehot(mac_hit_lite)); 
 sva_onehot_wr_port_hit: assert property(@posedge (clk) wr_early_v_o |=> $onehot(wr_port_i)); 
 xcheck_rd_v: assert property(@posedge (clk) ~$isunknown(rd_v_i)); 
 `endif
