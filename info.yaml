@@ -19,13 +19,18 @@ project:
   source_files:
     - "tt_um_coffeepot.v"
     - "aiguilleur.v"
-    - "dispatcher_broadcast.v"
+    - "dispatcher.v"
+    - "mac_addr_table.v"
     - "mac_rx.v"
     - "mac_tx.v"
     - "rmii.v"
     - "switch.v"
     - "tx_tt_buffer.v"
     - "utils.v"
+    - "arbitor.v"
+    - "lookup.v"
+    - "ttnn_timer.v"
+    - "replacement_policy.v" 
 
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
