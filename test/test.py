@@ -9,6 +9,8 @@ from cocotb.triggers import FallingEdge, RisingEdge, ClockCycles, with_timeout
 
 import random 
 import asyncio
+import time
+
 from array import array 
 
 import mac_utils
@@ -16,6 +18,7 @@ import phy_utils
 import table_utils
 
 import os
+
 if "GATES" in os.environ:
 	GATES = os.environ["GATES"].lower().strip()
 else:
@@ -30,6 +33,13 @@ def start_clk(dut):
 	clk_task = cocotb.start_soon(clock.start()) #runs the clock "in the background" 
 	return clk_task
 
+def set_random_seed():
+	if "SEED" in os.environ:
+		seed = int(os.environ["SEED"].lower().strip())
+	else:
+		seed = time.time_ns()
+	cocotb.log.info(f"random seed {seed}")
+	random.seed(seed)
 
 # Reset sequence
 async def rst(dut, ena=1 ):
@@ -86,7 +96,7 @@ async def send_and_check_frames(dut, rx: {int, mac_utils.eth_frame}, tx: {int, m
 # packets such that all broadcast TXs are free 
 @cocotb.test()
 async def simple_broadcast_test(dut):
-	random.seed(0)
+	set_random_seed()
 	await rst(dut) 
 	for _ in range(0, 10):
 		port_idx = random.randrange(0,phy_utils.PORT_CNT)
@@ -112,7 +122,7 @@ async def check_broadcast(dut, src_port:int, src_mac: bytes(6)):
 
 @cocotb.test()
 async def checking_broadcast_test(dut):
-	random.seed(0)
+	set_random_seed()
 	rx_frames = {}
 	tx_frames = {}
 	await rst(dut) 
@@ -142,7 +152,7 @@ async def check_unicast(dut, src_port:int, dst_port:int, dst_mac: bytes(6), src_
 
 @cocotb.test()
 async def simple_unicast_test(dut):
-	random.seed(0)
+	set_random_seed()
 	await rst(dut) 
 	target_mac =table_utils.random_unicast_mac() 
 	target_port = random.randrange(0,phy_utils.PORT_CNT)
@@ -162,7 +172,7 @@ async def simple_unicast_test(dut):
 
 @cocotb.test()
 async def table_entry_expire_test(dut):
-	random.seed(0)
+	set_random_seed()
 	await rst(dut) 
 	src_mac =table_utils.random_unicast_mac() 
 	cocotb.log.info(f"unicast src mac {src_mac.hex()}")
