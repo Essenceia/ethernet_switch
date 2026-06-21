@@ -134,6 +134,19 @@ async def check_broadcast(dut, src_port:int, src_mac: bytes(6), dst_mac: bytes(6
 			tx_frames[i] = rx_frames[src_port]	
 	await send_and_check_frames(dut, rx_frames, tx_frames)
 
+async def check_no_send(dut, src_port:int, src_mac: bytes(6), dst_mac:bytes(6)):
+	cocotb.log.info(f"check no send, RX{src_port} (dst_mac:{dst_mac.hex()} src_mac:{src_mac.hex()})") 
+	rx_frames = {}
+	tx_frames = {}
+	for i in range(0, phy_utils.PORT_CNT):
+		if i == src_port:
+			rx_frames[i] = mac_utils.simple_frame(src_mac = src_mac, dst_mac = dst_mac)
+		else:
+			rx_frames[i] = None
+	for i in range(0, phy_utils.PORT_CNT):
+		tx_frames[i] = None
+	await send_and_check_frames(dut, rx_frames, tx_frames)
+
 @cocotb.test()
 async def checking_broadcast_test(dut):
 	set_random_seed()
@@ -282,8 +295,18 @@ async def table_stress_read(dut):
 			table_utils.add_seen_src_mac(src_mac, src_port)
 			cocotb.log.info(f"add seen bis mac:{src_mac.hex()} port:{src_port}")
 			await ClockCycles(dut.clk, 2*8*4 + 1) 
-			
-		
+	
+@cocotb.test()
+async def no_rebroadcsat_on_incomming_test(dut):
+	set_random_seed()
+	await rst(dut)
+	for _ in range(0,TEST_ITER):
+		origin_mac = table_utils.random_unicast_mac() 		
+		origin_port = random.randrange(0, phy_utils.PORT_CNT)
+		await check_broadcast(dut, src_port = origin_port, src_mac = origin_mac, dst_mac = table_utils.random_unicast_mac()) 		
+		await ClockCycles(dut.clk, 2*8*4 + 1) 
+		await check_no_send(dut, src_port = origin_port, src_mac = table_utils.random_unicast_mac(), dst_mac = origin_mac) 		
+		await ClockCycles(dut.clk, 2*8*4 + 1) 
 
 
 

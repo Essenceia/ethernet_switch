@@ -49,7 +49,6 @@ wire             phy_rx_err[PORT_CNT-1:0];
 wire [PHY_W-1:0] phy_rx[PORT_CNT-1:0];
 
 wire             mac_rx_v[PORT_CNT-1:0];
-wire             mac_rx_start[PORT_CNT-1:0];
 wire [PHY_W-1:0] mac_rx[PORT_CNT-1:0];
 // RX0
 assign phy_rx[0][0]  = ui_in[0];
@@ -118,7 +117,6 @@ generate
 			.rx_i(rmii_rx[i]),
 			.rx_err_i(rmii_rx_err[i]),
 			.data_v_o(mac_rx_v[i]),
-			.data_start_o(mac_rx_start[i]),
 			.data_o(mac_rx[i])
 		);
 
@@ -141,7 +139,6 @@ switch m_switch(
 	.rst_n(rst_n_q), 
 	.mac_rx_v_i({mac_rx_v[2], mac_rx_v[1], mac_rx_v[0]}),
 	.mac_rx_i({mac_rx[2], mac_rx[1], mac_rx[0]}),
-	.mac_rx_start_i({mac_rx_start[2], mac_rx_start[1], mac_rx_start[0]}),
 	
 	.mac_tx_v_o({mac_tx_v[2], mac_tx_v[1], mac_tx_v[0]}),
 	.mac_tx_o({mac_tx[2], mac_tx[1], mac_tx[0]}),

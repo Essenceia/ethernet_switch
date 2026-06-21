@@ -52,10 +52,10 @@ mac_addr_table #(
 // remap hit to dispatch directive
 localparam SEL_W = PORT_CNT-1;
 
-wire [DISP_SEL_W-1:0] dir_lite;
+wire [DISP_SEL_W-1:0] dir_broadcast_lite;
 wire [DISP_SEL_W-1:0] dir_hit_masked;
 wire [DISP_SEL_W-1:0] hit_mask;
-assign dir_lite = {{req_port_i[1:0]}, // tx2
+assign dir_broadcast_lite = {{req_port_i[1:0]}, // tx2
 				   {req_port_i[2], req_port_i[0]}, // tx1
                    {req_port_i[2:1]}};// tx0
 
@@ -63,7 +63,7 @@ assign dir_lite = {{req_port_i[1:0]}, // tx2
 assign hit_mask = { {SEL_W{hit_port[2] | ~hit}},
 					{SEL_W{hit_port[1] | ~hit}},
 					{SEL_W{hit_port[0] | ~hit}}}; 
-assign dir_hit_masked = dir_lite & hit_mask; 
+assign dir_hit_masked = dir_broadcast_lite & hit_mask; 
 
 // output 
 assign new_dispatch_lite_o = ({PORT_CNT{~hit}} | hit_port) & ~req_port_i & {PORT_CNT{req_v_i}}; 

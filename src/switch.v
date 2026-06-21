@@ -16,7 +16,6 @@ module switch #(
 
 	input wire [PORT_CNT-1:0]       mac_rx_v_i,
 	input wire [PORT_CNT*PHY_W-1:0] mac_rx_i,
-	input wire [PORT_CNT-1:0]       mac_rx_start_i,
 
 	output wire [PORT_CNT-1:0]       mac_tx_v_o,
 	output wire [PORT_CNT*PHY_W-1:0] mac_tx_o,

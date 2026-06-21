@@ -202,7 +202,7 @@ assign debug_wr_port_idx = wr_port_idx;
 assign debug_wr_port     = wr_port_i;
 */
 
-assign hit_v_o    = |mac_hit & rd_v_i;
+assign hit_v_o    = |mac_hit; // will be masked in dispatch on req
 assign hit_port_o = port_hit_full; 
 
 `ifdef COCOTB
@@ -222,8 +222,14 @@ assign cocotb_entry_ttnn      = mem_ttnn_q;
 
 `endif
 `ifdef FORMAL 
-//sva_onehot_port_hit:    assert property(@posedge (clk) hit_v_o |-> $onehot(mac_hit_lite)); 
-sva_onehot_wr_port_hit: assert property(@posedge (clk) wr_early_v_o |=> $onehot(wr_port_i)); 
-xcheck_rd_v: assert property(@posedge (clk) ~$isunknown(rd_v_i)); 
+//sva_onehot_port_hit:    assert property(@posedge (clk) hit_v_o |-> $onehot(mac_hit_lite));
+always @(posedge clk) begin
+	if (rst_n) begin 
+		if (wr_early_v_o) 
+			sva_onehot_wr_port_hit: assert property($onehot(wr_port_i));
+ 
+		xcheck_rd_v: assert property(~$isunknown(rd_v_i)); 
+	end
+end
 `endif
 endmodule 
