@@ -317,9 +317,12 @@ async def close_rx_packets_test(dut):
 		random.shuffle(port_list)
 		rx_send_threads = []
 		for p in port_list: 
-			rx_frame = mac_utils.simple_frame(dst_mac = random.randbytes(6), src_mac = random.randbytes(6))
+			dst_mac = random.randbytes(6)
+			src_mac = table_utils.random_unicast_mac()
+			cocotb.log.info(f"frame RX{p} dst_mac:{dst_mac.hex()} src_mac:{src_mac.hex()}")
+			rx_frame = mac_utils.simple_frame(dst_mac = dst_mac, src_mac = src_mac)
 			rx_send_threads.append(cocotb.start_soon(mac_utils.write_rx_frame(dut, port_idx = p, raw = rx_frame.raw())))
-			await ClockCycles(dut.clk, random.randrange(0, 10))
+			await ClockCycles(dut.clk, random.randrange(0, 2))
 		for thread in rx_send_threads:
 			await thread
 		
