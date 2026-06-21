@@ -162,7 +162,7 @@ always @(*) begin
 		4'b??1?: port_hit = mem_port_q[1];
 		4'b?1??: port_hit = mem_port_q[2];
 		4'b1???: port_hit = mem_port_q[3];
-		default: port_hit = {PORT_IDX_W{1'bX}};
+		4'b0000: port_hit = {PORT_IDX_W{1'bX}};
 	endcase
 	/* verilator lint_on CASEOVERLAP */
 end
