@@ -177,6 +177,7 @@ always @(*) begin
 	endcase
 end
 
+/*
 (* dont_touch , keep *)wire [N-1:0] debug_mac_hit;  
 (* dont_touch , keep *)wire         debug_hit_v_o;  
 (* dont_touch , keep *)wire [N-1:0] debug_entry_alive;  
@@ -199,7 +200,7 @@ assign debug_mac_hit_lite = mac_hit_lite;
 assign debug_wr_v = wr_v & |wr_sel; 
 assign debug_wr_port_idx = wr_port_idx;
 assign debug_wr_port     = wr_port_i;
-
+*/
 
 assign hit_v_o    = |mac_hit & rd_v_i;
 assign hit_port_o = port_hit_full; 
