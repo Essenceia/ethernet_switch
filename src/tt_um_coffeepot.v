@@ -146,4 +146,21 @@ switch m_switch(
 	
 	.mac_tx_acc_i({mac_tx_acc[2], mac_tx_acc[1], mac_tx_acc[0]})
 );
+
+// SRAM - placeholder
+reg en_q; 
+wire [7:0] sram_rd_unused;
+always @(posedge clk) 
+	en_q <= ena; 
+
+(* keep *) gf180mcu_ocd_ip_sram__sram256x8m8wm1 m_sram(
+	.CLK(clk), 
+	.CEN(~en_q), // shut down sram in case this is ever included in a shuttle without power gatting
+	.GWEN({8{~en_q}}), // set all entries to 0 on rst
+	.WEN({8{1'b0}}),
+	.A({8{1'b0}}),
+	.D({8{1'b0}}),
+	.Q(sram_rd_unused)
+);
+
 endmodule

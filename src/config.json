@@ -51,6 +51,60 @@
 
   "CTS_CLK_MAX_WIRE_LENGTH": 250, 
 
+  "//": "3.3V 256x8x8 SRAM",
+  "MACROS": {
+  	"gf180mcu_ocd_ip_sram__sram256x8m8wm1":{
+		"instances": {
+			"m_sram": {
+				"location": [
+					485,
+					5
+				],
+				"orientation": "W"
+			}
+		},
+ 	   "gds":[
+ 	    	"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1.gds"
+		],
+ 	  	"lef":[
+ 	     	"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1.lef"
+		],
+ 	   "vh":[
+ 	   		"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1__blackbox_pp.v"
+		],
+ 	   "lib":{
+ 		     "*_tt_025C_3v30":[
+ 		      	"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1__tt_025C_3v30.lib"
+			],
+ 		     "*_ff_n40C_3v60":[
+ 		    	"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1__ff_n40C_3v60.lib"
+			],
+ 		     "*_ss_125C_3v00":[
+ 		     	"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1__ss_125C_3v00.lib"
+			]
+		},
+		"spice": [
+ 		     	"dir::sram/cells/gf180mcu_ocd_ip_sram__sram256x8m8wm1/gf180mcu_ocd_ip_sram__sram256x8m8wm1.spice"
+		],
+		"sdf": {}
+		}
+	},
+
+	"PDN_MACRO_CONNECTIONS":[
+		"m_sram VPWR VGND VDD! VSS!"
+	],
+
+	"//": "Modify PDN spacing to line up with sram WE power connections",
+	"PDN_VWIDTH": 6.0,
+	"PDN_VPITCH": 53.0,
+	"PDN_VOFFSET": 6.0,
+	"PDN_VSPACING": 2.0, 
+
+    "FP_MACRO_HORIZONTAL_HALO":1.0,
+    "FP_MACRO_VERTICAL_HALO":1.0,
+
+	"PDN_CFG": "dir::pdn_cfg.tcl",
+
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
@@ -75,8 +129,6 @@
 
   "FP_IO_HLENGTH": 2,
   "FP_IO_VLENGTH": 2,
-
-  "FP_PDN_VPITCH": 38.87,
 
   "//": "Clock",
   "RUN_CTS": 1,
