@@ -3,7 +3,6 @@
 #include <arpa/inet.h>
 #include <stdlib.h> 
 #include <stdio.h>
-#include "math_lib.hpp" 
 #include "eth_intf.h"
 
 void set_header(eth_header_t* header, 
@@ -42,19 +41,3 @@ void print_header(eth_header_t h){
 	printf("ethtype %04x\n", htons(h.ethtype));
 }
 
-void print_app_packet(app_packet_t *pkt, bool is_req){
-	printf("\n%s app packet:\n", is_req? "request":"response");
-	print_header(pkt->header);
-	if (is_req){
-		printf("a: ");
-		print_bf16(pkt->a);
-		printf("\nb: ");
-		print_bf16(pkt->b);
-	} else {
-		printf("c: ");
-		print_bf16(pkt->a);
-	}
-	printf("\nraw: ");
-	print_raw_packet((uint8_t*)pkt, APP_PACKET_LENGTH);
-	printf("\n\n");
-}
