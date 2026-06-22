@@ -28,9 +28,13 @@ module dispatcher #(
 	output wire [DISP_SEL_W-1:0] dir_o
 );
 
-wire                hit; 
-wire [PORT_CNT-1:0] hit_port; 
-
+wire                hit_next; 
+wire [PORT_CNT-1:0] hit_port_next; 
+reg                 hit_q;
+reg  [PORT_CNT-1:0] hit_port_q;
+reg                 req_v_q;
+reg  [PORT_CNT-1:0] req_port_q;
+ 
 mac_addr_table #(
 	.PORT_CNT(PORT_CNT), 
 	.MAC_W(MAC_W)
@@ -45,9 +49,16 @@ mac_addr_table #(
 	.wr_mac_i(wr_mac_i),
 	.wr_port_i(wr_port_i),
 	
-	.hit_v_o(hit),
-	.hit_port_o(hit_port)
+	.hit_v_o(hit_next),
+	.hit_port_o(hit_port_next)
 );
+
+always @(posedge clk) begin
+	hit_q <= hit_next; 
+	hit_port_q <= hit_port_next; 
+	req_v_q <= req_v_i; 
+	req_port_q <= req_port_i;
+end
 
 // remap hit to dispatch directive
 localparam SEL_W = PORT_CNT-1;
@@ -55,17 +66,17 @@ localparam SEL_W = PORT_CNT-1;
 wire [DISP_SEL_W-1:0] dir_broadcast_lite;
 wire [DISP_SEL_W-1:0] dir_hit_masked;
 wire [DISP_SEL_W-1:0] hit_mask;
-assign dir_broadcast_lite = {{req_port_i[1:0]}, // tx2
-				   {req_port_i[2], req_port_i[0]}, // tx1
-                   {req_port_i[2:1]}};// tx0
+assign dir_broadcast_lite = {{req_port_q[1:0]}, // tx2
+				  			 {req_port_q[2], req_port_i[0]}, // tx1
+                  			 {req_port_q[2:1]}};// tx0
 
 // fallback on broadcast in case of no hit
-assign hit_mask = { {SEL_W{hit_port[2] | ~hit}},
-					{SEL_W{hit_port[1] | ~hit}},
-					{SEL_W{hit_port[0] | ~hit}}}; 
+assign hit_mask = { {SEL_W{hit_port_q[2] | ~hit_q}},
+					{SEL_W{hit_port_q[1] | ~hit_q}},
+					{SEL_W{hit_port_q[0] | ~hit_q}}}; 
 assign dir_hit_masked = dir_broadcast_lite & hit_mask; 
 
 // output 
-assign new_dispatch_lite_o = ({PORT_CNT{~hit}} | hit_port) & ~req_port_i & {PORT_CNT{req_v_i}}; 
+assign new_dispatch_lite_o = ({PORT_CNT{~hit_q}} | hit_port_q) & ~req_port_q & {PORT_CNT{req_v_q}}; 
 assign dir_o = dir_hit_masked; 
 endmodule
