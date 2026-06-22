@@ -72,7 +72,7 @@ metasync_cdc #(.DATA_W(4)) m_cdc_phy1_rx(
 	.wclk(clk_phy1),
 	.wdata({phy1_rx_err_i, phy1_rx_v_i, phy1_rx_i}),
 	.rclk(clk_phy0),
-	.rrst_n(rst_async),
+	.rrst_n(~rst_async),
 	.rdata({phy1_rx_err_cdc, phy1_rx_v_cdc, phy1_rx_cdc})
 );
 
@@ -82,7 +82,7 @@ metasync_cdc #(.DATA_W(3)) m_cdc_phy1_tx(
 	.wclk(clk_phy0),
 	.wdata({phy1_tx_v_cdc, phy1_tx_cdc}),
 	.rclk(clk_phy1),
-	.rrst_n(rst_async),
+	.rrst_n(~rst_async),
 	.rdata({phy1_tx_v_o, phy1_tx_o})
 );
 
