@@ -31,7 +31,7 @@ _seen_mac = []
 def clear_seen_src_mac() -> list:
 	_seen_mac = []
 
-def _lookup_seen_per_mac(src_mac: bytes(6)) -> tuple(bytes(6), int):
+def _lookup_seen_per_mac(src_mac: bytes(6)) -> tuple[bytes(6), int]:
 	for mac, port in _seen_mac:
 		if mac == src_mac:
 			return mac, port
@@ -59,7 +59,7 @@ def add_seen_src_mac(src_mac: bytes(6), src_port: int):
 		_seen_mac.pop()
 		assert len(_seen_mac) <= ENTRY_NUM
 
-def random_seen_src_mac(dut, gates: str = "yes") -> tuple(bytes(6), int):
+def random_seen_src_mac(dut, gates: str = "yes") -> tuple[bytes(6), int]:
 	assert len(_seen_mac) > 0, f"Empty seen list"
 	assert len(_seen_mac) <= ENTRY_NUM, f"Unexpected seen list length, got {len(_seen_mac)}"
 	while True:
