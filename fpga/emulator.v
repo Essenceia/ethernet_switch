@@ -6,26 +6,33 @@ module emulator #(
 	parameter LED_W = 16
 )
 (
-   	input wire clk_phy_i, /* RMII ref clk 50MHz */
- 
 	// PmodC	
-	input  wire [1:0]  phy_rx_i,
-	input  wire        phy_rx_v_i,
-	input  wire        phy_rx_err_i,
-	output  wire [1:0] phy_tx_o,
-	output  wire       phy_tx_v_o,
+   	input wire        clk_phy0_i, /* RMII ref clk 50MHz */
+	input  wire [1:0] phy0_rx_i,
+	input  wire       phy0_rx_v_i,
+	input  wire       phy0_rx_err_i,
+	output wire [1:0] phy0_tx_o,
+	output wire       phy0_tx_v_o,
+
+   	input wire        clk_phy1_i, /* RMII ref clk 50MHz */
+	input  wire [1:0] phy1_rx_i,
+	input  wire       phy1_rx_v_i,
+	input  wire       phy1_rx_err_i,
+	output wire [1:0] phy1_tx_o,
+	output wire       phy1_tx_v_o,
 
 	// Misc
-	input wire  [SWITCH_W-1:0] switch_i,
+	input  wire [SWITCH_W-1:0] switch_i,
 	output wire [LED_W-1:0]   led_o,
 
 	output wire [11:0]        unused_o
 );
-wire [4:0] uo_out_unused; 
+wire [1:0] uo_out_unused; 
 
-wire clk_ibuf, clk_pll, clk_pll_feedback, clk;
-wire pll_lock;
-reg  pll_lock_q;
+wire pll_phy0_lock;
+wire pll_phy1_lock;
+reg  pll_phy0_lock_q;
+reg  pll_phy1_lock_q;
 wire ena;
 wire rst_async;
  
@@ -39,46 +46,34 @@ wire [7:0] uio_oe;
 wire tx_phase_async;
 
 /* clk */
-IBUF m_ibuf_clk(
-	.I(clk_phy_i),
-	.O(clk_ibuf)
+wire clk_phy0;
+pll m_phy0_pll(
+	.clk_i(clk_phy0_i),
+	.rst_async(rst_async), 
+	.locked_o(pll_phy0_lock),
+	.clk_o(clk_phy0)
+);
+wire pll_phy1_lock;
+wire clk_phy1;
+
+pll m_phy1_pll(
+	.clk_i(clk_phy1_i),
+	.rst_async(rst_async),
+	.locked_o(pll_phy1_lock),
+	.clk_o(clk_phy1)
 );
 
-PLLE2_BASE #(
-   .CLKFBOUT_MULT(20),        
-   .CLKIN1_PERIOD(20.0),      
-   .CLKOUT0_DIVIDE(20),
-   .DIVCLK_DIVIDE(1)
-) m_global_clk_pll (
-   .CLKFBIN(clk_pll_feedback),
-   .CLKFBOUT(clk_pll_feedback),
-   .CLKIN1(clk_ibuf),    
-   .CLKOUT0(clk_pll),
-/* verilator lint_off PINCONNECTEMPTY */
-   .CLKOUT1(),
-   .CLKOUT2(),
-   .CLKOUT3(),
-   .CLKOUT4(),
-   .CLKOUT5(),
-/* verilator lint_on PINCONNECTEMPTY */
-   .LOCKED(pll_lock),
-   .PWRDWN(1'b0),
-   .RST(rst_async) 
-);
-
-BUFG m_bufg_clk(
-	.I(clk_pll),
-	.O(clk)
-);
+/* phy1 cdc TODO */ 
 
 /* debug leds */
 assign led_o[0] = rst_async;
 assign led_o[1] = tx_phase_async;
 assign led_o[2] = ena;
-assign led_o[3] = clk;
-assign led_o[4] = pll_lock_q; 
+assign led_o[3] = clk_phy0;
+assign led_o[4] = pll_phy0_lock_q; 
+assign led_o[5] = pll_phy1_lock_q; 
 
-assign led_o[15:5] = 11'd0;
+assign led_o[15:6] = 10'd0;
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
@@ -87,41 +82,46 @@ assign rst_async      = switch_i[0];
 assign tx_phase_async = switch_i[1];
 
 debounce m_switch_debounce(
-	.clk(clk),
+	.clk(clk_phy0),
 	.rst_async(rst_async),
 	.switch_i(switch_i[2]),
 	.switch_o(ena)
 );
 
-always @(posedge clk or posedge rst_async) begin
+always @(posedge clk_phy0 or posedge rst_async) begin
 	if (rst_async) begin
-		pll_lock_q <= 1'b0;
+		pll_phy0_lock_q <= 1'b0;
+		pll_phy1_lock_q <= 1'b0;
 	end else begin
-		pll_lock_q <= pll_lock;
+		pll_phy0_lock_q <= pll_phy0_lock;
+		pll_phy1_lock_q <= pll_phy1_lock;
 	end
 end
 
-
-
-/* deisgn top level */ 
+/* design top level */ 
 (* MARK_DEBUG = "true" *) wire [1:0] debug_phy_tx;
 (* MARK_DEBUG = "true" *) wire       debug_phy_tx_v;
 assign debug_phy_tx_v = phy_tx_v_o;
 assign debug_phy_tx   = phy_tx_o;
 
 // IN
-assign ui_in[1:0] = phy_rx_i;
-assign ui_in[2]   = phy_rx_v_i;
-assign ui_in[3]   = phy_rx_err_i;
-assign ui_in[6:4] = {3{1'bx}};
-assign ui_in[7]    = tx_phase_async;
+assign ui_in[1:0] = phy0_rx_i;
+assign ui_in[2]   = phy0_rx_v_i;
+assign ui_in[3]   = phy0_rx_err_i;
+assign ui_in[5:4] = phy1_rx_i;
+assign ui_in[6]   = phy1_rx_v_i;
+assign ui_in[7]   = phy1_rx_err_i;
 
 // OUT
-assign phy_tx_o      = uo_out[1:0];
-assign phy_tx_v_o    = uo_out[2];
-assign uo_out_unused = uo_out[7:3];
+assign phy0_tx_o      = uo_out[1:0];
+assign phy0_tx_v_o    = uo_out[2];
+assign uo_out_unused  = uo_out[4:3];
+assign phy1_tx_o      = uo_out[6:5];
+assign phy1_tx_v_o    = uo_out[7];
 
 // IO
+assign uio_in[4]   = tx_phase_async;
+
 wire [7:0] uio_oe_unused, uio_out_unused;
 
 assign uio_in = {8{1'bx}};
@@ -135,7 +135,7 @@ tt_um_teapot m_top(
 	.uio_out(uio_out),
 	.uio_oe(uio_oe),
 	.ena(ena),
-	.clk(clk),
+	.clk(clk_phy0),
 	.rst_n(~rst_async)
 );
 
