@@ -256,8 +256,8 @@ async def table_realloc_test(dut):
 			assert dut.m_dut.m_switch.m_lookup.m_dispatcher.m_table.cocotb_nobody_is_dead.value == 0, f"Unexpacted multiple allocated table entries"
 			assert dut.m_dut.m_switch.m_lookup.m_dispatcher.m_table.cocotb_entry_alloc_cnt.value == 1, f"Expecting a single allocated table entry"
 
-# sim only tests
-@cocotb.test()
+# sim only tests: need accurate tracking of entry liveness to prevent fausle failes
+@cocotb.test(skip=True if GATES == "yes" else False):
 async def table_stress_read(dut):
 	set_random_seed()
 	await rst(dut)
