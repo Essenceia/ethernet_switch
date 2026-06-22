@@ -1,7 +1,7 @@
 
 `default_nettype none
 
-module pll(
+module phy_pll(
 	input  wire clk_i, 
 	input  wire rst_async_i, 
 

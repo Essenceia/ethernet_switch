@@ -13,7 +13,7 @@ module emulator #(
 	input  wire       phy0_rx_err_i,
 	output wire [1:0] phy0_tx_o,
 	output wire       phy0_tx_v_o,
-
+	// PmodA
    	input wire        clk_phy1_i, /* RMII ref clk 50MHz */
 	input  wire [1:0] phy1_rx_i,
 	input  wire       phy1_rx_v_i,
@@ -47,7 +47,7 @@ wire tx_phase_async;
 
 /* clk */
 wire clk_phy0;
-pll m_phy0_pll(
+phy_pll m_phy0_pll(
 	.clk_i(clk_phy0_i),
 	.rst_async_i(rst_async), 
 	.locked_o(pll_phy0_lock),
@@ -55,7 +55,7 @@ pll m_phy0_pll(
 );
 
 wire clk_phy1;
-pll m_phy1_pll(
+phy_pll m_phy1_pll(
 	.clk_i(clk_phy1_i),
 	.rst_async_i(rst_async),
 	.locked_o(pll_phy1_lock),
@@ -86,16 +86,22 @@ metasync_cdc #(.DATA_W(3)) m_cdc_phy1_tx(
 	.rdata({phy1_tx_v_o, phy1_tx_o})
 );
 
-
 /* debug leds */
 assign led_o[0] = rst_async;
 assign led_o[1] = tx_phase_async;
 assign led_o[2] = ena;
 assign led_o[3] = clk_phy0;
-assign led_o[4] = pll_phy0_lock_q; 
-assign led_o[5] = pll_phy1_lock_q; 
+assign led_o[4] = clk_phy1;
+assign led_o[5] = pll_phy0_lock_q; 
+assign led_o[6] = pll_phy1_lock_q; 
 
-assign led_o[15:6] = 10'd0;
+assign led_o[7] = phy0_rx_v_i; 
+assign led_o[8] = phy0_tx_v_o;
+ 
+assign led_o[9]  = phy1_rx_v_i; 
+assign led_o[10] = phy1_tx_v_o; 
+
+assign led_o[15:11] = 4'd0;
 
 assign unused_o = {4'h0, 1'b1, {7{1'b1}}}; // an, dp, seg
 
@@ -125,10 +131,18 @@ end
 (* MARK_DEBUG = "true" *) wire       debug_phy0_tx_v;
 (* MARK_DEBUG = "true" *) wire [1:0] debug_phy1_tx;
 (* MARK_DEBUG = "true" *) wire       debug_phy1_tx_v;
+(* MARK_DEBUG = "true" *) wire [1:0] debug_phy0_rx;
+(* MARK_DEBUG = "true" *) wire       debug_phy0_rx_v;
+(* MARK_DEBUG = "true" *) wire [1:0] debug_phy1_rx;
+(* MARK_DEBUG = "true" *) wire       debug_phy1_rx_v;
 assign debug_phy0_tx_v = phy0_tx_v_o;
 assign debug_phy0_tx   = phy0_tx_o;
-assign debug_phy1_tx_v = phy1_tx_v_o;
-assign debug_phy1_tx   = phy1_tx_o;
+assign debug_phy1_tx_v = phy1_tx_v_cdc;
+assign debug_phy1_tx   = phy1_tx_cdc;
+assign debug_phy0_rx_v = phy0_rx_v_i;
+assign debug_phy0_rx   = phy0_rx_i;
+assign debug_phy1_rx_v = phy1_rx_v_cdc;
+assign debug_phy1_rx   = phy1_rx_cdc;
 
 // IN
 assign ui_in[1:0] = phy0_rx_i;

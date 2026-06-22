@@ -101,14 +101,6 @@ set dephase_phy0_tx_clk_1 "dephase_phy0_tx_clk_1"
 create_generated_clock -name $dephase_phy0_tx_clk_0 -source [get_ports $clk_phy0] -master_clock $clk_phy0 -divide_by 1 $dephase_phy0_tx_clk_net -add
 create_generated_clock -name $dephase_phy0_tx_clk_1 -source [get_ports $clk_phy0] -master_clock $clk_phy0 -divide_by 1 -invert $dephase_phy0_tx_clk_net -add 
 set_clock_groups -logically_exclusive -group $dephase_phy0_tx_clk_0 -group $dephase_phy0_tx_clk_1
- 
-#TX1
-set dephase_phy1_tx_clk_net [get_nets -hier -regexp ".*g_channel.1.*/inner_clk" ]
-set dephase_phy1_tx_clk_0 "dephase_phy1_tx_clk_0"
-set dephase_phy1_tx_clk_1 "dephase_phy1_tx_clk_1"
-create_generated_clock -name $dephase_phy1_tx_clk_0 -source [get_ports $clk_phy1] -master_clock $clk_phy1 -divide_by 1 $dephase_phy1_tx_clk_net -add
-create_generated_clock -name $dephase_phy1_tx_clk_1 -source [get_ports $clk_phy1] -master_clock $clk_phy1 -divide_by 1 -invert $dephase_phy1_tx_clk_net -add 
-set_clock_groups -logically_exclusive -group $dephase_phy1_tx_clk_0 -group $dephase_phy1_tx_clk_1
 
 # lan8720a configs
 set ::env(PHY_RX0_PINS) [get_ports -regexp phy0_rx.*]
@@ -133,9 +125,11 @@ set_output_delay -clock $dephase_phy0_tx_clk_0 -max ${tsu} $::env(PHY_TX0_PINS)
 set_output_delay -clock $dephase_phy0_tx_clk_0 -min ${tihold} $::env(PHY_TX0_PINS)
 set_output_delay -clock $dephase_phy0_tx_clk_1 -max ${tsu} $::env(PHY_TX0_PINS) -add_delay
 set_output_delay -clock $dephase_phy0_tx_clk_1 -min ${tihold} $::env(PHY_TX0_PINS) -add_delay
-# TX1
-set_output_delay -clock $dephase_phy1_tx_clk_0 -max ${tsu} $::env(PHY_TX1_PINS)
-set_output_delay -clock $dephase_phy1_tx_clk_0 -min ${tihold} $::env(PHY_TX1_PINS)
-set_output_delay -clock $dephase_phy1_tx_clk_1 -max ${tsu} $::env(PHY_TX1_PINS) -add_delay
-set_output_delay -clock $dephase_phy1_tx_clk_1 -min ${tihold} $::env(PHY_TX1_PINS) -add_delay
 
+# TX1 - no config
+#set_output_delay -clock $dephase_phy1_tx_clk_0 -max ${tsu} $::env(PHY_TX1_PINS)
+#set_output_delay -clock $dephase_phy1_tx_clk_0 -min ${tihold} $::env(PHY_TX1_PINS)
+#set_output_delay -clock $dephase_phy1_tx_clk_1 -max ${tsu} $::env(PHY_TX1_PINS) -add_delay
+#set_output_delay -clock $dephase_phy1_tx_clk_1 -min ${tihold} $::env(PHY_TX1_PINS) -add_delay
+
+set_property CLOCK_DEDICATED_ROUTE FALSE [get_nets m_phy1_pll/clk_ibuf]

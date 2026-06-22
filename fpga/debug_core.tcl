@@ -5,8 +5,11 @@ create_debug_core $core_name ila
 set_property C_INPUT_PIPE_STAGES 2   [get_debug_cores ${core_name}]
 set_property C_DATA_DEPTH 4096       [get_debug_cores ${core_name}]
 # connect clk to main design logic clk
-puts "clk nets found [get_nets clk]"
-connect_debug_port db_core_0/clk [get_nets clk]
+set clk "m_phy0_pll/clk_o"
+set clk_net [get_nets -hier -regexp $clk]
+puts "clk nets search $clk"
+puts "clk nets found $clk_net"
+connect_debug_port db_core_0/clk $clk_net
 
 # connect debug ports 
 # dynamically connect all signals marked for debug in the design to 

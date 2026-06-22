@@ -19,7 +19,7 @@ VIVADO_CMD=vivado -mode batch -source
 
 SRC_PATH=../src
 
-GATE_NL_FILES=../final/tt_um_teapot.nl.v ../lib/sg13g2_stdcell_phony.v
+GATE_NL_FILES=../final/tt_um_coffeepot.nl.v 
 
 .PHONY: setup build prog gui
 
@@ -31,7 +31,7 @@ $(VIVADO_PRJ_PATH): setup.tcl
 
 setup: $(VIVADO_PRJ_PATH) 
 
-$(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC_PATH)/*.v) $(if $(gates),$(GATE_NL_FILES) $(wildcard *.v))
+$(VIVADO_CHECKPOINT_PATH): $(VIVADO_PRJ_PATH) $(wildcard *.xdc) $(wildcard $(SRC_PATH)/*.v) $(if $(gates),$(GATE_NL_FILES), $(wildcard *.v))
 	$(VIVADO_CMD) build.tcl -tclargs $(VIVADO_PRJ_PATH) $(VIVADO_BIT_PATH) $(VIVADO_CHECKPOINT_PATH) $(if $(gates),1,0) $(if $(debug), $(debug) $(VIVADO_DEBUG_PROBE_PATH) )
 
 build: $(VIVADO_CHECKPOINT_PATH)
